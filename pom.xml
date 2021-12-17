@@ -1,0 +1,139 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>es.lavanda</groupId>
+	<artifactId>filebot-bot</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>lavanda-filebot-bot</name>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.6.1</version>
+	</parent>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>11</java.version>
+		<maven.compiler.target>11</maven.compiler.target>
+		<project.scm.id>github</project.scm.id>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>es.lavanda</groupId>
+			<artifactId>lib-common</artifactId>
+			<version>0.0.56</version>
+		</dependency>
+		<!-- ============================== SPRINGBOOT ============================ -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+		<!-- ================================== JAXB ============================== -->
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+		</dependency>
+		<!-- ============================== XSTREAM ================================ -->
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.4.18</version>
+			<scope>runtime</scope>
+		</dependency>
+		<!-- ================================ JSOUP =============================== -->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.14.2</version>
+		</dependency>
+		<!-- ================================ TELEGAM BOTS =============================== -->
+		<dependency>
+			<groupId>org.telegram</groupId>
+			<artifactId>telegrambots</artifactId>
+			<version>5.5.0</version>
+		</dependency>
+		<!-- ============================= LOMBOK ================================= -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.14</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>2.28.2</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.squareup.okhttp3</groupId>
+			<artifactId>okhttp</artifactId>
+			<version>3.4.2</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>3.1.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<from>
+						<image>openjdk:11-slim</image>
+						<platforms>
+							<platform>
+								<architecture>amd64</architecture>
+								<os>linux</os>
+							</platform>
+							<platform>
+								<architecture>arm64</architecture>
+								<os>linux</os>
+							</platform>
+						</platforms>
+					</from>
+					<to>
+						<image>registry-1.docker.io/lavandadelpatio/filebot-parser</image>
+						<tags>
+							<tag>${project.version}</tag>
+							<tag>${project.version}-${TRIMMED_SHA}</tag>
+							<tag>latest</tag>
+						</tags>
+					</to>
+					<container>
+						<environment>
+							<TZ>Europe/Madrid</TZ>
+						</environment>
+						<user>1000:1000</user>
+					</container>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

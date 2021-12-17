@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: lavanda-filebot-parser
+  profiles:
+    active: dev
+cloud:
+  aws:
+    stack:
+      auto: false
+    region:
+      static: eu-west-1
+    sns:
+      enabled: true    

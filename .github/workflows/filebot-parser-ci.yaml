@@ -1,0 +1,71 @@
+name: Filebot parser - CI
+on:
+  schedule:
+    - cron: '0 0 * * *' 
+  push:
+    branches:
+      - 'main'
+      - 'develop'
+  workflow_dispatch:    
+jobs:
+  test-nightly:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Build Maven
+        run: mvn test -s .mvn/settings.xml 
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_GITHUB_TOKEN }}  
+      - name: Send telegram message
+        if: always()
+        uses: xinthink/action-telegram@v1
+        with:
+          botToken: ${{ secrets.TELEGRAM_TOKEN }}
+          chatId: ${{ secrets.TELEGRAM_TO }}
+          jobStatus: ${{ job.status }}
+          skipSuccess: true  
+  release-build-push-docker:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: luiscajl/mvn-release@main
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          github_token: ${{ secrets.DEPLOY_GITHUB_TOKEN }} 
+          directory: .
+      - uses: luiscajl/mvn-build-push-dockerhub@main
+        with:
+          registry_username: ${{ secrets.DOCKER_USERNAME }}
+          registry_password: ${{ secrets.DOCKER_PASSWORD }}
+          github_workspace: $GITHUB_WORKSPACE
+          github_token: ${{ secrets.DEPLOY_GITHUB_TOKEN }} 
+  next-snapshot:
+    needs: release-build-push-docker
+    if: (github.ref == 'refs/heads/main')  && (github.event_name == 'push')  
+    runs-on: ubuntu-latest  
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2   
+        with:
+          ref: develop   
+      - uses: luiscajl/next-maven-snapshot@main
+  notification:
+    needs: [release-build-push-docker, next-snapshot, test-nightly]
+    runs-on: ubuntu-latest  
+    steps:     
+    - name: Send telegram message
+      if: ${{ failure() }}
+      uses: xinthink/action-telegram@v1
+      with:
+        botToken: ${{ secrets.TELEGRAM_TOKEN }}
+        chatId: ${{ secrets.TELEGRAM_TO }}
+        jobStatus: ${{ job.status }}         
+        
