@@ -4,11 +4,11 @@ import org.springframework.stereotype.Repository;
 
 import es.lavanda.filebot.bot.model.Filebot;
 
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 
 @Repository
-public interface FilebotRepository extends PagingAndSortingRepository<Filebot, String> {
+public interface FilebotRepository extends MongoRepository<Filebot, String> {
 
     
 }
