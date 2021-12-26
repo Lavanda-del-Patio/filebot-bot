@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import es.lavanda.filebot.bot.exception.FilebotParserException;
 import es.lavanda.filebot.bot.model.Filebot;
-import es.lavanda.filebot.bot.model.FilebotFile;
+import es.lavanda.filebot.bot.model.FilebotNameSelection;
 import es.lavanda.filebot.bot.repository.FilebotFileRepository;
 import es.lavanda.filebot.bot.repository.FilebotRepository;
 import es.lavanda.filebot.bot.util.FilebotParser;
@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class FilebotService implements CommandLineRunner{
+public class FilebotService implements CommandLineRunner {
 
     @Autowired
     private FilebotRepository filebotRepository;
@@ -37,7 +37,6 @@ public class FilebotService implements CommandLineRunner{
     @Value("${filebot.path}")
     private String FILEBOT_PATH;
 
-
     private String getHtmlData(String filePath) {
         try {
             return Files.readString(Path.of(filePath));
@@ -47,10 +46,10 @@ public class FilebotService implements CommandLineRunner{
         }
     }
 
-    private List<FilebotFile> getAllFilesFounded(String path) {
+    private List<FilebotNameSelection> getAllFilesFounded(String path) {
         try (Stream<Path> walk = Files.walk(Paths.get(path))) {
 
-            return walk.filter(Files::isRegularFile).map(filePath -> new FilebotFile(filePath.toString()))
+            return walk.filter(Files::isRegularFile).map(filePath -> new FilebotNameSelection(filePath.toString()))
                     .collect(Collectors.toList());
         } catch (IOException e) {
             log.error("Can not access to path {}", FILEBOT_PATH, e);
@@ -58,12 +57,11 @@ public class FilebotService implements CommandLineRunner{
         }
     }
 
-
     @Override
     public void run(String... args) throws Exception {
         log.info("Start schedule parse new files");
-        List<FilebotFile> newFiles = getAllFilesFounded(FILEBOT_PATH);
-        List<FilebotFile> oldFiles = (List<FilebotFile>) filebotFileRepository.findAll();
+        List<FilebotNameSelection> newFiles = getAllFilesFounded(FILEBOT_PATH);
+        List<FilebotNameSelection> oldFiles = (List<FilebotNameSelection>) filebotFileRepository.findAll();
         newFiles.removeAll(oldFiles);
         newFiles.forEach(file -> {
             log.info("Parsing new file {}", file.getFilePath());
@@ -71,6 +69,6 @@ public class FilebotService implements CommandLineRunner{
             filebotRepository.saveAll(filebots);
             filebotFileRepository.save(file);
         });
-        log.info("Finish schedule parse new files");        
+        log.info("Finish schedule parse new files");
     }
 }
