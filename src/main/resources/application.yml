@@ -3,6 +3,19 @@ spring:
     name: lavanda-filebot-parser
   profiles:
     active: dev
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: user
+    password: bitnami
+    listener:
+        simple:
+            retry:
+                enabled: true
+                initial-interval: 3s
+                max-attempts: 1
+                max-interval: 10s
+                multiplier: 2  
 cloud:
   aws:
     stack:
@@ -11,3 +24,4 @@ cloud:
       static: eu-west-1
     sns:
       enabled: true    
+server.port: 0      
