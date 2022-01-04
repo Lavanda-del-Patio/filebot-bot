@@ -1,30 +1,15 @@
 package es.lavanda.filebot.bot.config;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
 public class BotConfig {
-    public static final String WEATHER_TOKEN = "<token>";
-    public static final String WEATHER_USER = "weatherbot";
 
-    public static final String TRANSIFEX_TOKEN = "<token>";
-    public static final String TRANSIFEX_USER = "TGlanguagesbot";
+    @Value("${telegram.filebot.token}")
+    public String FILEBOT_TOKEN;
 
-    public static final String FILES_TOKEN = "<token>";
-    public static final String FILES_USER = "filesbot";
+    @Value("${telegram.filebot.user}")
+    public String FILEBOT_USER;
 
-    public static final String DIRECTIONS_TOKEN = "<token>";
-    public static final String DIRECTIONS_USER = "directionsbot";
-
-    public static final String CHANNEL_TOKEN = "<token>";
-    public static final String CHANNEL_USER = "channelupdatesbot";
-
-    public static final String RAE_TOKEN = "<token>";
-    public static final String RAE_USER = "raebot";
-
-    public static final String WEBHOOK_TOKEN = "<token>";
-    public static final String WEBHOOK_USER = "webhooksamplebot";
-
-    public static final String COMMANDS_TOKEN = "<token>";
-    public static final String COMMANDS_USER = "MyCommandsBot";
-    
-    public static final String ELEKTROLLART_TOKEN = "<token>";
-    public static final String ELEKTROLLART_USER = "ElektrollArtFanBot";
 }

@@ -21,9 +21,9 @@ public class FilebotNameSelection {
     @Id
     private String id;
 
-    private String folder;
+    private String path;
 
-    private String file;
+    private List<String> files;
 
     private List<String> possibilities;
 

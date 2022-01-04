@@ -8,4 +8,8 @@ spring:
             port: 27017 
             username: root
 filebot:
-    path: src/main/resources/filebot/            
+    path: src/main/resources/filebot/      
+telegram:
+  filebot:
+    token: XXXXXX
+    user: testingbot          
