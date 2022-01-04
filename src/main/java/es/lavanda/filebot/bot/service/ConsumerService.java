@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ConsumerService {
 
-    private final FilebotService   filebotService;
+    private final FilebotService filebotService;
 
     @RabbitListener(queues = "filebot-executor")
     public void consumeMessageFeedFilms(FilebotExecutionIDTO filebotExecutionIDTO) {
@@ -22,5 +22,15 @@ public class ConsumerService {
         throw new FilebotBotException("error");
         // log.info("Work message finished");
     }
-
+    /**
+     * FilebotExecutionIDTO(
+     * id=61cef9c3b442581c35b08487,
+     * files=[El incidente BD1080.atomixhq.net.mkv],
+     * path=src/main/resources/filebot/El incidente [BluRay 1080p][DTS 5.1
+     * Castellano DTS-HD 5.1-Ingles+Subs][ES-EN]
+     * )
+     * 
+     * 
+     * 
+     */
 }
