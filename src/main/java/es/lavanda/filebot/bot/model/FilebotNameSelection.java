@@ -37,8 +37,4 @@ public class FilebotNameSelection {
     @Field("last_modified_at")
     private Date lastModifiedAt;
 
-    public enum FilebotNameStatus {
-        UNPROCESSING, PROCESSING, PROCESSED
-
-    }
 }

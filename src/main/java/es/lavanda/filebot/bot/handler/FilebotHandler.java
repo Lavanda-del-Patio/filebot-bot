@@ -1,6 +1,7 @@
 package es.lavanda.filebot.bot.handler;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -18,10 +19,16 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import es.lavanda.filebot.bot.config.BotConfig;
 import es.lavanda.filebot.bot.exception.FilebotBotException;
+import es.lavanda.filebot.bot.model.FilebotNameSelection;
+import es.lavanda.filebot.bot.model.FilebotNameStatus;
+import es.lavanda.filebot.bot.repository.FilebotNameRepository;
+import es.lavanda.filebot.bot.service.ProducerService;
+import es.lavanda.lib.common.model.FilebotExecutionODTO;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -33,14 +40,53 @@ public class FilebotHandler extends TelegramLongPollingBot {
     @Autowired
     private BotConfig botConfig;
 
+    @Autowired
+    private FilebotNameRepository filebotNameRepository;
+
+    @Autowired
+    private ProducerService producerService;
+
     @Override
     public String getBotUsername() {
-        return botConfig.FILEBOT_USER;
+        return botConfig.getFilebotUser();
     }
 
     @Override
     public String getBotToken() {
-        return botConfig.FILEBOT_TOKEN;
+        return botConfig.getFilebotToken();
+    }
+
+    @PostConstruct
+    public void postConstruct() {
+        // log.info("PostConstruct");
+        // Optional<FilebotNameSelection> optFilebot =
+        // filebotNameRepository.findByStatusPROCESSING();
+        // if (Boolean.FALSE.equals(optFilebot.isPresent())) {
+        // List<FilebotNameSelection> filebots =
+        // filebotNameRepository.findAllByStatusUNPROCESSING();
+        // if (Boolean.FALSE.equals(filebots.isEmpty())) {
+        // sendMessageWithKeyboard(filebots.get(0));
+        // }
+        // }
+    }
+
+    @Scheduled(fixedRate = 60000)
+    private void hourlyCheck() {
+        log.info("Hourly check...");
+        Optional<FilebotNameSelection> optFilebot = filebotNameRepository
+                .findByStatus(FilebotNameStatus.PROCESSING.name());
+        if (Boolean.FALSE.equals(optFilebot.isPresent())) {
+            List<FilebotNameSelection> filebots = filebotNameRepository
+                    .findAllByStatus(FilebotNameStatus.UNPROCESSING.name());
+            if (Boolean.FALSE.equals(filebots.isEmpty())) {
+                FilebotNameSelection filebotNameSelection = filebots.get(0);
+                if (filebotNameSelection.getPossibilities().isEmpty()) {
+                    sendMessage(filebotNameSelection);
+                } else {
+                    sendMessageWithKeyboard(filebotNameSelection);
+                }
+            }
+        }
     }
 
     @Override
@@ -57,48 +103,99 @@ public class FilebotHandler extends TelegramLongPollingBot {
         }
     }
 
-    private void handleIncomingMessage(Message message) throws TelegramApiException {
-        // final int state =
-        // DatabaseManager.getInstance().getWeatherState(message.getFrom().getId(),
-        // message.getChatId());
-        // final String language =
-        // DatabaseManager.getInstance().getUserWeatherOptions(message.getFrom().getId())[0];
-        // if (!message.isUserMessage() && message.hasText()) {
-        // if (isCommandForOther(message.getText())) {
-        // return;
-        // } else if (message.getText().startsWith(Commands.STOPCOMMAND)){
-        // sendHideKeyboard(message.getFrom().getId(), message.getChatId(),
-        // message.getMessageId());
-        // return;
-        // }
-        // }
-        String response = message.getText();
+    private void sendMessageWithKeyboard(FilebotNameSelection filebotNameSelection) {
         SendMessage sendMessageRequest = new SendMessage();
-        sendMessageRequest.setChatId(message.getChatId().toString());
-        sendMessageRequest.setText("Hola");
-        sendMessageRequest.setReplyMarkup(getReplyKeyboardMarkup());
-
-        execute(sendMessageRequest);
+        sendMessageRequest.setChatId(botConfig.getFilebotAdmin());
+        sendMessageRequest.setText(
+                "La carpeta es " + filebotNameSelection.getPath() + "Escribe un nombre para forzar la respuesta");
+        sendMessageRequest.setReplyMarkup(getReplyKeyboardMarkup(filebotNameSelection.getFiles()));
+        try {
+            execute(sendMessageRequest);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+            log.error("Telegram exception sendind message with keyboard", e);
+        }
     }
 
-    private ReplyKeyboardMarkup getReplyKeyboardMarkup() {
+    private void sendMessage(FilebotNameSelection filebotNameSelection) {
+        SendMessage sendMessageRequest = new SendMessage();
+        sendMessageRequest.setChatId(botConfig.getFilebotAdmin());
+        sendMessageRequest.setText(
+                "La carpeta con error es \n◦ **" + filebotNameSelection.getPath()
+                        + "**\nEscribe para forzar el filebot a renombrar");
+        sendMessageRequest.setReplyMarkup(getKeyboardRemove());
+
+        try {
+            execute(sendMessageRequest);
+        } catch (TelegramApiException e) {
+            log.error("Telegram exception sendind message with keyboard", e);
+        }
+        sendMessage(filebotNameSelection.getFiles());
+        filebotNameSelection.setStatus(FilebotNameStatus.PROCESSING);
+        filebotNameRepository.save(filebotNameSelection);
+    }
+
+    private void sendMessage(List<String> files) {
+        SendMessage sendMessageRequest = new SendMessage();
+        sendMessageRequest.setChatId(botConfig.getFilebotAdmin());
+        StringBuilder sb = new StringBuilder();
+        files.forEach(f -> {
+            sb.append("◦ " + f.trim());
+            sb.append("\n");
+        });
+        sendMessageRequest.setText(sb.toString());
+        try {
+            execute(sendMessageRequest);
+        } catch (TelegramApiException e) {
+            log.error("Telegram exception sendind message with keyboard", e);
+        }
+    }
+
+    private ReplyKeyboard getKeyboardRemove() {
+        ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove();
+        replyKeyboardRemove.setSelective(true);
+        replyKeyboardRemove.setRemoveKeyboard(true);
+        return replyKeyboardRemove;
+    }
+
+    private void handleIncomingMessage(Message message) throws TelegramApiException {
+        log.info("Handle incomming message");
+        filebotNameRepository.findByStatus("PROCESSING").ifPresent(
+                (x) -> {
+                    producerService.sendFilebotExecution(
+                            getFilebotExecutionODTO(message.getText(), x));
+                    x.setStatus(FilebotNameStatus.PROCESSED);
+                    filebotNameRepository.save(x);
+                    log.info("Processed filebotNameSelectionId: " + x.getPath());
+                });
+    }
+
+    private FilebotExecutionODTO getFilebotExecutionODTO(String text, FilebotNameSelection filebotNameSelection) {
+        FilebotExecutionODTO filebotExecutionODTO = new FilebotExecutionODTO();
+        filebotExecutionODTO.setForceQuery(true);
+        filebotExecutionODTO.setQuery(text);
+        filebotExecutionODTO.setId(filebotNameSelection.getId());
+        return filebotExecutionODTO;
+    }
+
+    private ReplyKeyboardMarkup getReplyKeyboardMarkup(List<String> list) {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setOneTimeKeyboard(true);
         List<KeyboardRow> keyboard = new ArrayList<>();
         KeyboardRow row = new KeyboardRow();
-        row.add("1");
-        row.add("2");
+        list.forEach(row::add);
         keyboard.add(row);
-        row = new KeyboardRow();
-        // for (iterable_type iterable_element : iterable) {
-        // getNewCommand(language)
-        // }
-        row.add("3");
-        row.add("4");
-        keyboard.add(row);
+        // row = new KeyboardRow();
+        // // for (iterable_type iterable_element : iterable) {
+        // // getNewCommand(language)
+        // // }
+        // row.add("3");
+        // row.add("4");
+        // keyboard.add(row);
         replyKeyboardMarkup.setKeyboard(keyboard);
         return replyKeyboardMarkup;
     }
+
 }

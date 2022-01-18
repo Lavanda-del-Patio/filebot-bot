@@ -19,7 +19,9 @@ public class ConsumerService {
     public void consumeMessageFeedFilms(FilebotExecutionIDTO filebotExecutionIDTO) {
         log.info("Reading message of the queue filebot-executor: {}", filebotExecutionIDTO);
         filebotService.run(filebotExecutionIDTO);
-        throw new FilebotBotException("error");
+        log.info("Finish message of the queue filebot-executor");
+
+        // throw new FilebotBotException("error");
         // log.info("Work message finished");
     }
     /**

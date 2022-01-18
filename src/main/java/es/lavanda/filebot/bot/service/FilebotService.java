@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import es.lavanda.filebot.bot.model.FilebotNameSelection;
-import es.lavanda.filebot.bot.model.FilebotNameSelection.FilebotNameStatus;
+import es.lavanda.filebot.bot.model.FilebotNameStatus;
 import es.lavanda.filebot.bot.repository.FilebotNameRepository;
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
 import lombok.extern.slf4j.Slf4j;

@@ -7,9 +7,25 @@ import org.springframework.stereotype.Component;
 public class BotConfig {
 
     @Value("${telegram.filebot.token}")
-    public String FILEBOT_TOKEN;
+    private String FILEBOT_TOKEN;
 
     @Value("${telegram.filebot.user}")
-    public String FILEBOT_USER;
+    private String FILEBOT_USERNAME;
+
+    @Value("${telegram.filebot.admin}")
+    private String FILEBOT_ADMIN;
+
+
+    public String getFilebotToken() {
+        return FILEBOT_TOKEN;
+    }
+
+    public String getFilebotUser() {
+        return FILEBOT_USERNAME;
+    }
+
+    public String getFilebotAdmin() {
+        return FILEBOT_ADMIN;
+    }
 
 }
