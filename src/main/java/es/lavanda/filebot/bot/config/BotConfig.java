@@ -1,30 +1,31 @@
 package es.lavanda.filebot.bot.config;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
 public class BotConfig {
-    public static final String WEATHER_TOKEN = "<token>";
-    public static final String WEATHER_USER = "weatherbot";
 
-    public static final String TRANSIFEX_TOKEN = "<token>";
-    public static final String TRANSIFEX_USER = "TGlanguagesbot";
+    @Value("${telegram.filebot.token}")
+    private String FILEBOT_TOKEN;
 
-    public static final String FILES_TOKEN = "<token>";
-    public static final String FILES_USER = "filesbot";
+    @Value("${telegram.filebot.user}")
+    private String FILEBOT_USERNAME;
 
-    public static final String DIRECTIONS_TOKEN = "<token>";
-    public static final String DIRECTIONS_USER = "directionsbot";
+    @Value("${telegram.filebot.admin}")
+    private String FILEBOT_ADMIN;
 
-    public static final String CHANNEL_TOKEN = "<token>";
-    public static final String CHANNEL_USER = "channelupdatesbot";
 
-    public static final String RAE_TOKEN = "<token>";
-    public static final String RAE_USER = "raebot";
+    public String getFilebotToken() {
+        return FILEBOT_TOKEN;
+    }
 
-    public static final String WEBHOOK_TOKEN = "<token>";
-    public static final String WEBHOOK_USER = "webhooksamplebot";
+    public String getFilebotUser() {
+        return FILEBOT_USERNAME;
+    }
 
-    public static final String COMMANDS_TOKEN = "<token>";
-    public static final String COMMANDS_USER = "MyCommandsBot";
-    
-    public static final String ELEKTROLLART_TOKEN = "<token>";
-    public static final String ELEKTROLLART_USER = "ElektrollArtFanBot";
+    public String getFilebotAdmin() {
+        return FILEBOT_ADMIN;
+    }
+
 }

@@ -2,10 +2,13 @@ spring:
     data: 
         mongodb:
             authentication-database: admin
-            database: test 
+            database: lavanda 
             host: localhost 
             password:  example
             port: 27017 
-            username: root
-filebot:
-    path: src/main/resources/filebot/            
+            username: root    
+telegram:
+  filebot:
+    token: 5025549707:AAGZE4MFPlJXH4RNcUZ8XObRHDdYetdKUD0
+    user: testingbot   
+    admin: "6608071"       
