@@ -11,10 +11,12 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.generics.LongPollingBot;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import es.lavanda.filebot.bot.exception.FilebotBotException;
 import es.lavanda.filebot.bot.handler.FilebotHandler;
+import es.lavanda.filebot.bot.service.FilebotService;
 import es.lavanda.lib.common.config.CommonConfigurator;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,14 +29,21 @@ import lombok.extern.slf4j.Slf4j;
 public class AppBeans {
 
     @Autowired
-    private FilebotHandler filebotHandler;
+    private FilebotService filebotService;
+
+    @Autowired
+    private BotConfig botConfig;
 
     @PostConstruct
     public void start() {
         log.info("Instantiate Telegram Bots API...");
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-            botsApi.registerBot(filebotHandler);
+            FilebotHandler filebotHandler = new FilebotHandler(botConfig.getFilebotUser(), botConfig.getFilebotToken(),
+                    filebotService);
+            filebotService.setFilebotHandler(filebotHandler);
+            botsApi.registerBot(
+                    filebotHandler);
         } catch (TelegramApiException e) {
             log.error("Exception instantiate Telegram Bot!", e);
             throw new FilebotBotException(e);

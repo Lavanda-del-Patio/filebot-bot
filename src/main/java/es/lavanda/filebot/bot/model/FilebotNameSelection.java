@@ -29,6 +29,14 @@ public class FilebotNameSelection {
 
     private FilebotNameStatus status;
 
+    private String label;
+
+    private boolean forceStrict;
+
+    private String query;
+
+    private String selectedPossibilitie;
+
     @CreatedDate
     @Field("created_at")
     private Date createdAt;

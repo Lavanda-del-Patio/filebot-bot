@@ -12,9 +12,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 @Repository
 public interface FilebotNameRepository extends MongoRepository<FilebotNameSelection, String> {
 
+    Optional<FilebotNameSelection> findByStatusStartsWith(String status);
 
-    Optional<FilebotNameSelection> findByStatus(String status);
-    
     List<FilebotNameSelection> findAllByStatus(String Status);
 
 }
