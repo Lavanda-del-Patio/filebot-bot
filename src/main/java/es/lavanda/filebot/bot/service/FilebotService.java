@@ -9,5 +9,9 @@ public interface FilebotService {
 
     void handleIncomingResponse(String chatId, String response);
 
+    void handleCallbackResponse(String chatId, String messageId, String response);
+
+    void saveMessageId(String chatId, String messageId);
+
     void setFilebotHandler(FilebotHandler filebotHandler);
 }
