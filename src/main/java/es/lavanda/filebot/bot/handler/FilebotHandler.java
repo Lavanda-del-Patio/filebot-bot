@@ -52,8 +52,9 @@ public class FilebotHandler extends TelegramLongPollingBot {
         }
     }
 
-    public void sendMessage(SendMessage sendMessage, boolean needSave) {
+    public void sendMessage(SendMessage sendMessage, boolean needSave)  {
         try {
+            sendMessage.setText(abbreviate(sendMessage.getText(), 4096));
             sendMessage.enableMarkdown(true);
             Message message = execute(sendMessage);
             if (needSave) {
@@ -61,28 +62,33 @@ public class FilebotHandler extends TelegramLongPollingBot {
             }
         } catch (TelegramApiException e) {
             log.error("Telegram exception sendind message with keyboard", e);
+            // throw e;
         }
     }
 
-    public void deleteMessage(DeleteMessage deleteMessage) {
+    public void deleteMessage(DeleteMessage deleteMessage){
         try {
             execute(deleteMessage);
         } catch (TelegramApiException e) {
             log.error("Telegram exception deleteMessage message with keyboard", e);
+            // throw e;
+        }
+    }
+
+    public void sendMessage(EditMessageText sendMessage){
+        try {
+            sendMessage.setText(abbreviate(sendMessage.getText(), 4096));
+            sendMessage.enableMarkdown(true);
+            execute(sendMessage);
+        } catch (TelegramApiException e) {
+            log.error("Telegram exception sendind message with keyboard", e);
+            // throw e;
+
         }
     }
 
     private void saveMessageId(Long chatId, Integer messageId) {
         filebotServiceImpl.saveMessageId(String.valueOf(chatId), String.valueOf(messageId));
-    }
-
-    public void sendMessage(EditMessageText sendMessage) {
-        try {
-            sendMessage.enableMarkdown(true);
-            execute(sendMessage);
-        } catch (TelegramApiException e) {
-            log.error("Telegram exception sendind message with keyboard", e);
-        }
     }
 
     private void handleIncomingMessage(Message message) throws TelegramApiException {
@@ -92,6 +98,15 @@ public class FilebotHandler extends TelegramLongPollingBot {
     private void handleCallbackMessage(CallbackQuery callbackQuery) throws TelegramApiException {
         filebotServiceImpl.handleCallbackResponse(String.valueOf(callbackQuery.getMessage().getChatId()),
                 String.valueOf(callbackQuery.getMessage().getMessageId()), callbackQuery.getData());
+    }
+
+    public static String abbreviate(String str, int size) {
+        if (str.length() <= size)
+            return str;
+        int index = str.lastIndexOf(' ', size);
+        if (index <= -1)
+            return "";
+        return str.substring(0, index);
     }
 
 }
