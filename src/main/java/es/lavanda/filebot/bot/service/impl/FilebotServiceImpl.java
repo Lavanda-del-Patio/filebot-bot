@@ -150,10 +150,9 @@ public class FilebotServiceImpl implements FilebotService {
     private void sendMessage(String text, boolean forceSave) {
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.setChatId(botConfig.getFilebotAdmin());
-        sendMessageRequest.setText(text);
+        sendMessageRequest.setText(abbreviate(text, 3000));
         sendMessageRequest.setReplyMarkup(getKeyboardRemove());
         filebotHandler.sendMessage(sendMessageRequest, forceSave);
-
     }
 
     private ReplyKeyboard getKeyboardRemove() {
@@ -343,7 +342,7 @@ public class FilebotServiceImpl implements FilebotService {
         new_message.setChatId(chatId);
         new_message.setMessageId(Integer.parseInt(messageId));
         new_message.setText(response);
-        filebotHandler.sendMessage(new_message);
+        filebotHandler.sendEditMessage(new_message);
     }
 
     private void cleanInlineKeyboard(String chatId, String messageId) {
@@ -374,6 +373,16 @@ public class FilebotServiceImpl implements FilebotService {
         telegramInlineKeyboard.setChatId(chatId);
         telegramInlineKeyboard.setMessageId(messageId);
         telegramMessageRepository.save(telegramInlineKeyboard);
+    }
+
+
+    private String abbreviate(String str, int size) {
+        if (str.length() <= size)
+            return str;
+        int index = str.lastIndexOf(' ', size);
+        if (index <= -1)
+            return "";
+        return str.substring(0, index);
     }
 
 }
