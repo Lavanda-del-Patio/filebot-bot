@@ -54,7 +54,7 @@ public class FilebotHandler extends TelegramLongPollingBot {
 
     public void sendMessage(SendMessage sendMessage, boolean needSave)  {
         try {
-            sendMessage.setText(abbreviate(sendMessage.getText(), 4096));
+            sendMessage.setText(abbreviate(sendMessage.getText(), 200));
             sendMessage.enableMarkdown(true);
             Message message = execute(sendMessage);
             if (needSave) {
@@ -77,7 +77,7 @@ public class FilebotHandler extends TelegramLongPollingBot {
 
     public void sendMessage(EditMessageText sendMessage){
         try {
-            sendMessage.setText(abbreviate(sendMessage.getText(), 4096));
+            sendMessage.setText(abbreviate(sendMessage.getText(), 200));
             sendMessage.enableMarkdown(true);
             execute(sendMessage);
         } catch (TelegramApiException e) {
