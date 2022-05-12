@@ -124,7 +124,7 @@ public class FilebotServiceImpl implements FilebotService {
         sendMessageRequest
                 .setText(String.format(
                         "La carpeta es *%s*.\nLos ficheros son:\n*%s*Selecciona el tipo de contenido:",
-                        filebotNameSelection.getPath(), sb.toString()));
+                        filebotNameSelection.getPath(), abbreviate(sb.toString(), 400) ));
         sendMessageRequest.setReplyMarkup(getInlineKeyboard(List.of("Serie", "Pelicula"), List.of("TV", "MOVIE")));
         filebotHandler.sendMessage(sendMessageRequest, false);
     }
