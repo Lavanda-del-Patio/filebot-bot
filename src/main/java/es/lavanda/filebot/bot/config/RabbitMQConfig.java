@@ -11,8 +11,8 @@ import org.springframework.amqp.core.QueueBuilder;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String QUEUE_MESSAGES = "filebot-executor";
-    public static final String QUEUE_MESSAGES_DLQ = "filebot-executor-dlq";
+    public static final String QUEUE_MESSAGES = "filebot-telegram";
+    public static final String QUEUE_MESSAGES_DLQ = "filebot-telegram-dlq";
     
     public static final String EXCHANGE_MESSAGES = "lavandadelpatio-exchange";
 
