@@ -17,11 +17,11 @@ public class ProducerService {
 
     public void sendFilebotExecution(FilebotExecutionODTO filebot) {
         try {
-            log.info("Sending message to queue {}", "filebot-executor-resolution");
-            rabbitTemplate.convertAndSend("filebot-executor-resolution", filebot);
+            log.info("Sending message to queue {}", "filebot-telegram-resolution");
+            rabbitTemplate.convertAndSend("filebot-telegram-resolution", filebot);
             log.info("Sended message to queue");
         } catch (Exception e) {
-            log.error("Failed send message to queue {}", "filebot-executor-resolution", e);
+            log.error("Failed send message to queue {}", "filebot-telegram-resolution", e);
             throw new FilebotBotException("Failed send message to queue", e);
         }
     }
