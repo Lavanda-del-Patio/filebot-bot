@@ -14,10 +14,10 @@ public class ConsumerService {
 
     private final FilebotService filebotService;
 
-    @RabbitListener(queues = "filebot-executor")
+    @RabbitListener(queues = "filebot-telegram")
     public void consumeMessageFeedFilms(FilebotExecutionIDTO filebotExecutionIDTO) {
-        log.info("Reading message of the queue filebot-executor: {}", filebotExecutionIDTO);
+        log.info("Reading message of the queue filebot-telegram: {}", filebotExecutionIDTO);
         filebotService.run(filebotExecutionIDTO);
-        log.info("Finish message of the queue filebot-executor");
+        log.info("Finish message of the queue filebot-telegram");
     }
 }
