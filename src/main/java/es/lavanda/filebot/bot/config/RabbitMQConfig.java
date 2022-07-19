@@ -13,6 +13,9 @@ public class RabbitMQConfig {
 
     public static final String QUEUE_MESSAGES = "filebot-telegram";
     public static final String QUEUE_MESSAGES_DLQ = "filebot-telegram-dlq";
+
+    public static final String QUEUE_MESSAGES_TELEGRAM = "telegram-execution";
+    public static final String QUEUE_MESSAGES_TELEGRAM_DLQ = "telegram-execution-dlq";
     
     public static final String EXCHANGE_MESSAGES = "lavandadelpatio-exchange";
 
@@ -37,4 +40,20 @@ public class RabbitMQConfig {
         return QueueBuilder.durable(QUEUE_MESSAGES_DLQ).build();
     }
 
+
+    @Bean
+    Binding bindingMessagesTelegram() {
+        return BindingBuilder.bind(messagesQueue()).to(messagesExchange()).with(QUEUE_MESSAGES_TELEGRAM);
+    }
+
+    @Bean
+    Queue messagesQueueTelegram() {
+        return QueueBuilder.durable(QUEUE_MESSAGES_TELEGRAM).withArgument("x-dead-letter-exchange", "")
+                .withArgument("x-dead-letter-routing-key", QUEUE_MESSAGES_TELEGRAM_DLQ).build();
+    }
+
+    @Bean
+    Queue deadLetterQueueTelegram() {
+        return QueueBuilder.durable(QUEUE_MESSAGES_TELEGRAM_DLQ).build();
+    }
 }

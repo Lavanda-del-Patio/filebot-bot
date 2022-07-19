@@ -1,5 +1,6 @@
 package es.lavanda.filebot.bot.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -17,7 +18,7 @@ import lombok.ToString;
 @Document("filebot_name_selection")
 @ToString
 @EqualsAndHashCode(exclude = { "id", "createdAt", "lastModifiedAt" })
-public class FilebotNameSelection {
+public class FilebotNameSelection implements Serializable {
     @Id
     private String id;
 

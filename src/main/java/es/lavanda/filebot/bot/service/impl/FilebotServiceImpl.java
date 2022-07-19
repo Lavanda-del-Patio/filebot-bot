@@ -69,12 +69,10 @@ public class FilebotServiceImpl implements FilebotService {
         return filebotNameSelection;
     }
 
-    @Scheduled(fixedRate = 60000)
-    private void hourlyCheck() {
-        log.info("Hourly check...");
-        Optional<FilebotNameSelection> optFilebot = filebotNameRepository
-                .findByStatusStartsWith("PROCESSING");
-        if (Boolean.FALSE.equals(optFilebot.isPresent())) {
+    public void processNotProcessing() {
+        log.info("processNotProcessing EMPTY method...");
+        if (Boolean.FALSE.equals(filebotNameRepository
+                .findByStatusStartsWith("PROCESSING").isPresent())) {
             List<FilebotNameSelection> filebots = filebotNameRepository
                     .findAllByStatus(FilebotNameStatus.UNPROCESSING.name());
             if (Boolean.FALSE.equals(filebots.isEmpty())) {
@@ -84,6 +82,18 @@ public class FilebotServiceImpl implements FilebotService {
                 } else {
                     handleFilebotWithPossibilities(filebotNameSelection);
                 }
+            }
+        }
+    }
+
+    public void processNotProcessing(FilebotNameSelection filebotNameSelection) {
+        log.info("processNotProcessing whith model method...");
+        if (Boolean.FALSE.equals(filebotNameRepository
+                .findByStatusStartsWith("PROCESSING").isPresent())) {
+            if (filebotNameSelection.getPossibilities().isEmpty()) {
+                handleFilebotWithoutPosibilities(filebotNameSelection);
+            } else {
+                handleFilebotWithPossibilities(filebotNameSelection);
             }
         }
     }
@@ -124,7 +134,7 @@ public class FilebotServiceImpl implements FilebotService {
         sendMessageRequest
                 .setText(String.format(
                         "La carpeta es *%s*.\nLos ficheros son:\n*%s*Selecciona el tipo de contenido:",
-                        filebotNameSelection.getPath(), abbreviate(sb.toString(), 400) ));
+                        filebotNameSelection.getPath(), abbreviate(sb.toString(), 400)));
         sendMessageRequest.setReplyMarkup(getInlineKeyboard(List.of("Serie", "Pelicula"), List.of("TV", "MOVIE")));
         filebotHandler.sendMessage(sendMessageRequest, false);
     }
@@ -266,7 +276,7 @@ public class FilebotServiceImpl implements FilebotService {
         // }
         log.info("Processed filebotNameSelectionId: " +
                 filebotNameSelection.getPath());
-        hourlyCheck();
+        processNotProcessing();
     }
 
     private TelegramMessage getLastMessageId(String chatId) {
@@ -374,7 +384,6 @@ public class FilebotServiceImpl implements FilebotService {
         telegramInlineKeyboard.setMessageId(messageId);
         telegramMessageRepository.save(telegramInlineKeyboard);
     }
-
 
     private String abbreviate(String str, int size) {
         if (str.length() <= size)
