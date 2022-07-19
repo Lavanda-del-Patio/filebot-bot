@@ -58,6 +58,7 @@ public class FilebotServiceImpl implements FilebotService {
         FilebotNameSelection filebotNameSelection = convertToModel(filebotExecutionIDTO);
         filebotNameSelection.setStatus(FilebotNameStatus.UNPROCESSING);
         filebotNameRepository.save(filebotNameSelection);
+        producerService.sendTelegramExecution(filebotNameSelection);
     }
 
     private FilebotNameSelection convertToModel(FilebotExecutionIDTO filebotExecutionIDTO) {
