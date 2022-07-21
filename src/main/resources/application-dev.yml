@@ -8,7 +8,12 @@ spring:
             port: 27017 
             username: root    
 telegram:
-  filebot:
+  filebotbot:
     token: 5025549707:AAGfWqnBULjz1F67Jx8KvvF6hKdsIgfd-SU
-    user: testingbot   
-    admin: "6608071"       
+    username: testingbot         
+    authorized: 
+      usernames: 
+        - luisca_jl
+        - CarlUndert
+        - Vatalx
+        - chemg

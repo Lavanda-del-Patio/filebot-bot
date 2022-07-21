@@ -7,16 +7,23 @@ import lombok.Data;
 import lombok.ToString;
 
 @Data
-@Document("telegram_messages")
+@Document("telegram_conversation")
 @ToString
-public class TelegramMessage {
+public class TelegramConversation {
 
     @Id
     private String id;
+
+    private String name;
 
     private String chatId;
 
     private String messageId;
 
-    private String text;
+    private TelegramStatus status;
+
+    public enum TelegramStatus {
+        STARTED, IDLE, WAITING_USER_RESPONSE, STOPPED;
+
+    }
 }

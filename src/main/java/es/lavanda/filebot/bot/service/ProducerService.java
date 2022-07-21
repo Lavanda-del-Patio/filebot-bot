@@ -4,7 +4,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import es.lavanda.filebot.bot.exception.FilebotBotException;
-import es.lavanda.filebot.bot.model.FilebotNameSelection;
+import es.lavanda.filebot.bot.model.TelegramFilebotExecution;
 import es.lavanda.lib.common.model.FilebotExecutionODTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ public class ProducerService {
         }
     }
 
-    public void sendTelegramExecution(FilebotNameSelection filebot) {
+    public void sendTelegramExecution(TelegramFilebotExecution filebot) {
         try {
             log.info("Sending message to queue {}", "telegram-execution");
             rabbitTemplate.convertAndSend("telegram-execution", filebot);

@@ -1,6 +1,0 @@
-package es.lavanda.filebot.bot.model;
-
-public enum FilebotNameStatus {
-    UNPROCESSING, PROCESSING_LABEL, PROCESSING_FORCE_STRICT, PROCESSING_QUERY, PROCESSING_WITH_POSSIBILITIES, PROCESSED
-
-}
