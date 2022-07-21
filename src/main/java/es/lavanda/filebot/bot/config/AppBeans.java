@@ -32,15 +32,15 @@ public class AppBeans {
     private FilebotService filebotService;
 
     @Autowired
-    private BotConfig botConfig;
+    private FilebotBotConfig botConfig;
 
     @PostConstruct
     public void start() {
         log.info("Instantiate Telegram Bots API...");
         try {
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-            FilebotHandler filebotHandler = new FilebotHandler(botConfig.getFilebotUser(), botConfig.getFilebotToken(),
-                    filebotService);
+            FilebotHandler filebotHandler = new FilebotHandler(
+                    filebotService, botConfig);
             filebotService.setFilebotHandler(filebotHandler);
             botsApi.registerBot(
                     filebotHandler);

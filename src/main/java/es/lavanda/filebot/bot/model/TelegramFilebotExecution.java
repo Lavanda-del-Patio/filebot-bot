@@ -15,10 +15,10 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @Data
-@Document("filebot_name_selection")
+@Document("telegram_filebot_execution")
 @ToString
 @EqualsAndHashCode(exclude = { "id", "createdAt", "lastModifiedAt" })
-public class FilebotNameSelection implements Serializable {
+public class TelegramFilebotExecution implements Serializable {
     @Id
     private String id;
 
@@ -46,4 +46,8 @@ public class FilebotNameSelection implements Serializable {
     @Field("last_modified_at")
     private Date lastModifiedAt;
 
+    public enum FilebotNameStatus {
+        UNPROCESSING, PROCESSING_LABEL, PROCESSING_FORCE_STRICT, PROCESSING_QUERY, PROCESSING_WITH_POSSIBILITIES, PROCESSED
+    
+    }
 }

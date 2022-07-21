@@ -1,12 +1,16 @@
 package es.lavanda.filebot.bot.service;
 
 import es.lavanda.filebot.bot.handler.FilebotHandler;
-import es.lavanda.filebot.bot.model.FilebotNameSelection;
+import es.lavanda.filebot.bot.model.TelegramFilebotExecution;
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
 
 public interface FilebotService {
 
     void run(FilebotExecutionIDTO filebotExecutionIDTO);
+
+    void newConversation(String chatId,String name);
+
+    void stopConversation(String chatId);
 
     void handleIncomingResponse(String chatId, String response);
 
@@ -16,8 +20,8 @@ public interface FilebotService {
 
     void setFilebotHandler(FilebotHandler filebotHandler);
 
-    void processNotProcessing(FilebotNameSelection filebotNameSelection);
+    void processNotProcessing(TelegramFilebotExecution filebotNameSelection);
 
-    void processNotProcessing();
+    // void processNotProcessing(String chatId);
 
 }

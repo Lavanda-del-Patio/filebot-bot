@@ -1,5 +1,7 @@
 package es.lavanda.filebot.bot.handler;
 
+import java.util.Objects;
+
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -9,6 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import es.lavanda.filebot.bot.config.FilebotBotConfig;
 import es.lavanda.filebot.bot.service.FilebotService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,48 +20,48 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 public class FilebotHandler extends TelegramLongPollingBot {
 
-    private String botUsername;
-
-    private String botToken;
-
     private FilebotService filebotServiceImpl;
+
+    private FilebotBotConfig botConfig;
 
     @Override
     public String getBotUsername() {
-        return botUsername;
+        return botConfig.getUsername();
     }
 
     @Override
     public String getBotToken() {
-        return botToken;
+        return botConfig.getToken();
     }
 
     @Override
     public void onUpdateReceived(Update update) {
         try {
-            if (update.hasMessage()) {
+            if (update.hasMessage() && isAuthorized(update.getMessage().getFrom().getUserName())) {
+                log.info("Authorized");
                 Message message = update.getMessage();
                 if (message.hasText()) {
                     handleIncomingMessage(message);
                 }
-            } else {
+            } else if (Objects.nonNull(update.getCallbackQuery())) {
+                log.info("Authorized");
                 Message message = update.getCallbackQuery().getMessage();
                 if (message.hasText()) {
                     handleCallbackMessage(update.getCallbackQuery());
                 }
+            } else {
+                log.info("Unauthorized user: {}", update.getMessage().getFrom().getUserName());
             }
         } catch (Exception e) {
             log.info("Exception onUpdateReceived", e);
         }
     }
 
-    public void sendMessage(SendMessage sendMessage, boolean needSave) {
+    public void sendMessage(SendMessage sendMessage) {
         try {
             sendMessage.enableMarkdown(true);
             Message message = execute(sendMessage);
-            if (needSave) {
-                saveMessageId(message.getChatId(), message.getMessageId());
-            }
+            saveMessageId(message.getChatId(), message.getMessageId());
         } catch (TelegramApiException e) {
             log.error("Telegram exception sendind message with keyboard", e);
             // throw e;
@@ -90,12 +93,27 @@ public class FilebotHandler extends TelegramLongPollingBot {
     }
 
     private void handleIncomingMessage(Message message) throws TelegramApiException {
-        filebotServiceImpl.handleIncomingResponse(String.valueOf(message.getChatId()), message.getText());
+        if (message.getText().startsWith("/start")) {
+            if (message.isGroupMessage())
+                filebotServiceImpl.newConversation(String.valueOf(message.getChatId()), message.getChat().getTitle());
+            else {
+                filebotServiceImpl.newConversation(String.valueOf(message.getChatId()),
+                        message.getFrom().getUserName());
+            }
+        } else if (message.getText().startsWith("/stop")) {
+            filebotServiceImpl.stopConversation(String.valueOf(message.getChatId()));
+        } else {
+            filebotServiceImpl.handleIncomingResponse(String.valueOf(message.getChatId()), message.getText());
+        }
     }
 
     private void handleCallbackMessage(CallbackQuery callbackQuery) throws TelegramApiException {
         filebotServiceImpl.handleCallbackResponse(String.valueOf(callbackQuery.getMessage().getChatId()),
                 String.valueOf(callbackQuery.getMessage().getMessageId()), callbackQuery.getData());
+    }
+
+    private boolean isAuthorized(String username) {
+        return botConfig.isAuthorizedToUseBot(username);
     }
 
 }
