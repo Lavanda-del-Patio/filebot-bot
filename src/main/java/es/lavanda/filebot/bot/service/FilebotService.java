@@ -16,8 +16,6 @@ public interface FilebotService {
 
     void handleCallbackResponse(String chatId, String messageId, String response);
 
-    void saveMessageId(String chatId, String messageId);
-
     void setFilebotHandler(FilebotHandler filebotHandler);
 
     void processNotProcessing(TelegramFilebotExecution filebotNameSelection);

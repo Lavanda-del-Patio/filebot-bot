@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 @Repository
-public interface FilebotNameRepository extends MongoRepository<TelegramFilebotExecution, String> {
+public interface TelegramFilebotExecutionRepository extends MongoRepository<TelegramFilebotExecution, String> {
 
     Optional<TelegramFilebotExecution> findByStatusStartsWith(String status);
 

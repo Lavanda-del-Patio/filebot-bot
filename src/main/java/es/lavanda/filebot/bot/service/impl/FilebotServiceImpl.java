@@ -16,14 +16,15 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import es.lavanda.filebot.bot.handler.FilebotHandler;
 import es.lavanda.filebot.bot.model.TelegramFilebotExecution;
 import es.lavanda.filebot.bot.model.TelegramConversation;
 import es.lavanda.filebot.bot.model.TelegramConversation.TelegramStatus;
 import es.lavanda.filebot.bot.model.TelegramFilebotExecution.FilebotNameStatus;
-import es.lavanda.filebot.bot.repository.FilebotNameRepository;
 import es.lavanda.filebot.bot.repository.TelegramConversationRepository;
+import es.lavanda.filebot.bot.repository.TelegramFilebotExecutionRepository;
 import es.lavanda.filebot.bot.service.FilebotService;
 import es.lavanda.filebot.bot.service.ProducerService;
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
@@ -38,7 +39,7 @@ public class FilebotServiceImpl implements FilebotService {
     private FilebotHandler filebotHandler;
 
     @Autowired
-    private FilebotNameRepository filebotNameRepository;
+    private TelegramFilebotExecutionRepository telegramFilebotExecutionRepository;
 
     @Autowired
     private TelegramConversationRepository telegramConversationRepository;
@@ -50,71 +51,78 @@ public class FilebotServiceImpl implements FilebotService {
     public void run(FilebotExecutionIDTO filebotExecutionIDTO) {
         TelegramFilebotExecution filebotNameSelection = convertToModel(filebotExecutionIDTO);
         filebotNameSelection.setStatus(FilebotNameStatus.UNPROCESSING);
-        filebotNameRepository.save(filebotNameSelection);
+        telegramFilebotExecutionRepository.save(filebotNameSelection);
         producerService.sendTelegramExecution(filebotNameSelection);
     }
 
     @Override
     public void newConversation(String chatId, String name) {
-        if (telegramConversationRepository.existsByChatId(chatId)) {
+        telegramConversationRepository.findByChatId(chatId).ifPresentOrElse((telegramConversation) -> {
+            telegramConversation.setStatus(TelegramStatus.IDLE);
+            telegramConversationRepository.save(telegramConversation);
+            sendMessage("Reiniciado...", chatId);
+        }, () -> {
             TelegramConversation telegramConversation = new TelegramConversation();
             telegramConversation.setChatId(chatId);
             telegramConversation.setName(name);
-            telegramConversation.setStatus(TelegramStatus.STARTED);
+            telegramConversation.setStatus(TelegramStatus.IDLE);
             telegramConversationRepository.save(telegramConversation);
-            sendMessage("Explicame porque vuelves a darle a start si ya esta iniciado... Gusano.", chatId);
-        } else {
-            TelegramConversation telegramConversation = new TelegramConversation();
-            telegramConversation.setChatId(chatId);
-            telegramConversation.setName(name);
-            telegramConversation.setStatus(TelegramStatus.STARTED);
-            telegramConversationRepository.save(telegramConversation);
-            processNotProcessing(chatId);
-        }
+            processNotProcessing();
+        });
     }
 
-    public void processNotProcessing(TelegramFilebotExecution filebotNameSelection) {
+    public void processNotProcessing(TelegramFilebotExecution telegramFilebotExecution) {
         log.info("processNotProcessing whith model method...");
-        if (Boolean.FALSE.equals(filebotNameRepository
+        if (Boolean.FALSE.equals(telegramFilebotExecutionRepository
                 .findByStatusStartsWith("PROCESSING").isPresent())) {
-            List<TelegramConversation> chatIds = telegramConversationRepository
+            List<TelegramConversation> telegramConversations = telegramConversationRepository
                     .findAllByStatus(TelegramStatus.IDLE.toString());
-            for (TelegramConversation telegramConversation : chatIds) {
-                if (filebotNameSelection.getPossibilities().isEmpty()) {
-                    handleFilebotWithoutPosibilities(filebotNameSelection, telegramConversation.getChatId());
+            for (TelegramConversation telegramConversation : telegramConversations) {
+                String messageId = null;
+                if (telegramFilebotExecution.getPossibilities().isEmpty()) {
+                    messageId = sendMessageToSelectLabel(telegramFilebotExecution,
+                            telegramConversation.getChatId());
+                    telegramFilebotExecution.setStatus(FilebotNameStatus.PROCESSING_LABEL);
                 } else {
-                    handleFilebotWithPossibilities(filebotNameSelection, telegramConversation.getChatId());
+                    messageId = sendMessageWithPossibilities(telegramFilebotExecution,
+                            telegramConversation.getChatId());
+                    telegramFilebotExecution.setStatus(FilebotNameStatus.PROCESSING_WITH_POSSIBILITIES);
                 }
+                telegramFilebotExecutionRepository.save(telegramFilebotExecution);
+                telegramConversation.setStatus(TelegramStatus.WAITING_USER_RESPONSE);
+                telegramConversation.setMessageId(messageId);
+                log.info("Saving telegram conversation with status {} and messageId {}", "WAITING_USER_RESPONSE",
+                        messageId);
+                telegramConversationRepository.save(telegramConversation);
             }
         }
     }
 
-    private void handleFilebotWithPossibilities(TelegramFilebotExecution filebotNameSelection, String chatId) {
-        log.info("Filebot with possibilities: {}", filebotNameSelection);
-        sendMessageWithPossibilities(filebotNameSelection, chatId);
-        filebotNameSelection.setStatus(FilebotNameStatus.PROCESSING_WITH_POSSIBILITIES);
-        filebotNameRepository.save(filebotNameSelection);
+    public void processNotProcessing() {
+        log.info("processNotProcessing with list of chatIds...");
+        if (Boolean.FALSE.equals(telegramFilebotExecutionRepository
+                .findByStatusStartsWith("PROCESSING").isPresent())) {
+            List<TelegramFilebotExecution> filebots = telegramFilebotExecutionRepository
+                    .findAllByStatus(FilebotNameStatus.UNPROCESSING.name());
+            if (Boolean.FALSE.equals(filebots.isEmpty())) {
+                processNotProcessing(filebots.get(0));
+            }
+        }
     }
 
-    private void handleFilebotWithoutPosibilities(TelegramFilebotExecution filebotNameSelection, String chatId) {
-        log.info("Filebot without possibilities: {}", filebotNameSelection);
-        sendMessageToSelectLabel(filebotNameSelection, chatId);
-        filebotNameSelection.setStatus(FilebotNameStatus.PROCESSING_LABEL);
-        filebotNameRepository.save(filebotNameSelection);
-    }
-
-    private void sendMessageWithPossibilities(TelegramFilebotExecution filebotNameSelection, String chatId) {
+    private String sendMessageWithPossibilities(TelegramFilebotExecution telegramFilebotExecution, String chatId) {
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.setChatId(chatId);
         sendMessageRequest
                 .setText(String.format("La carpeta es %s.\nLos ficheros son: %s\nSelecciona el posible resultado:",
-                        filebotNameSelection.getPath(), filebotNameSelection.getFiles()));
-        sendMessageRequest.setReplyMarkup(getReplyKeyboardMarkup(filebotNameSelection.getFiles()));
+                        telegramFilebotExecution.getPath(), telegramFilebotExecution.getFiles()));
+        sendMessageRequest.setReplyMarkup(getReplyKeyboardMarkup(telegramFilebotExecution.getFiles()));
         // sendMessageRequest.setReplyMarkup(getInlineKeyboard(filebotNameSelection.getFiles()));
-        filebotHandler.sendMessage(sendMessageRequest);
+        return filebotHandler.sendMessage(sendMessageRequest);
     }
 
-    private void sendMessageToSelectLabel(TelegramFilebotExecution filebotNameSelection, String chatId) {
+    private String sendMessageToSelectLabel(TelegramFilebotExecution filebotNameSelection, String chatId) {
+        log.info("Send message to select label to chatid: {}", chatId);
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.setChatId(chatId);
         StringBuilder sb = new StringBuilder();
@@ -127,33 +135,33 @@ public class FilebotServiceImpl implements FilebotService {
                         "La carpeta es *%s*.\nLos ficheros son:\n*%s*Selecciona el tipo de contenido:",
                         filebotNameSelection.getPath(), abbreviate(sb.toString(), 400)));
         sendMessageRequest.setReplyMarkup(getInlineKeyboard(List.of("Serie", "Pelicula"), List.of("TV", "MOVIE")));
-        filebotHandler.sendMessage(sendMessageRequest);
+        return filebotHandler.sendMessage(sendMessageRequest);
     }
 
-    private void sendMessageToForceStrict(String chatId) {
+    private String sendMessageToForceStrict(String chatId) {
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.setChatId(chatId);
         sendMessageRequest.setText(
                 "¿Modo de matcheo del filebot?");
         sendMessageRequest.setReplyMarkup(getInlineKeyboard(List.of("Strict", "Opportunistic")));
-        filebotHandler.sendMessage(sendMessageRequest);
+        return filebotHandler.sendMessage(sendMessageRequest);
     }
 
-    private void sendMessageToForceQuery(String chatId) {
+    private String sendMessageToForceQuery(String chatId) {
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.setChatId(chatId);
         sendMessageRequest.setText(
                 "¿Texto extra para potenciar el matcheo? Ex: 'Vengadores: Endgame'");
         sendMessageRequest.setReplyMarkup(getInlineKeyboard(List.of("No")));
-        filebotHandler.sendMessage(sendMessageRequest);
+        return filebotHandler.sendMessage(sendMessageRequest);
     }
 
-    private void sendMessage(String text, String chatId) {
+    private String sendMessage(String text, String chatId) {
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.setChatId(chatId);
         sendMessageRequest.setText(abbreviate(text, 3000));
         sendMessageRequest.setReplyMarkup(getKeyboardRemove());
-        filebotHandler.sendMessage(sendMessageRequest);
+        return filebotHandler.sendMessage(sendMessageRequest);
     }
 
     private ReplyKeyboard getKeyboardRemove() {
@@ -219,20 +227,21 @@ public class FilebotServiceImpl implements FilebotService {
         return inlineKeyboardMarkup;
     }
 
-    private void handleProcessing(TelegramFilebotExecution filebotNameSelection, String response, String chatId,
+    private void handleProcessing(TelegramFilebotExecution telegramFilebotExecution, String response, String chatId,
             String messageId) {
-        switch (filebotNameSelection.getStatus()) {
+        log.info("Handle processing for telegramFilebotExecution: {}", telegramFilebotExecution.toString());
+        switch (telegramFilebotExecution.getStatus()) {
             case PROCESSING_LABEL:
-                handleProcessingLabel(filebotNameSelection, response, chatId, messageId);
+                handleProcessingLabel(telegramFilebotExecution, response, chatId, messageId);
                 break;
             case PROCESSING_FORCE_STRICT:
-                handleProcessingForceStrict(filebotNameSelection, response, chatId, messageId);
+                handleProcessingForceStrict(telegramFilebotExecution, response, chatId, messageId);
                 break;
             case PROCESSING_QUERY:
-                handleProcessingQuery(filebotNameSelection, response, chatId, messageId);
+                handleProcessingQuery(telegramFilebotExecution, response, chatId, messageId);
                 break;
             case PROCESSING_WITH_POSSIBILITIES:
-                handleProcessingWithPossibilities(filebotNameSelection, response, chatId, messageId);
+                handleProcessingWithPossibilities(telegramFilebotExecution, response, chatId, messageId);
                 break;
             default:
                 log.error("It should not be here");
@@ -245,16 +254,17 @@ public class FilebotServiceImpl implements FilebotService {
         log.info("Handle processing with possibilities");
     }
 
-    private void handleProcessingQuery(TelegramFilebotExecution filebotNameSelection, String response, String chatId,
+    private void handleProcessingQuery(TelegramFilebotExecution telegramFilebotExecution, String response,
+            String chatId,
             String messageId) {
         log.info("Handle processing query");
         if (Boolean.FALSE.equals(response.equalsIgnoreCase("NO"))) {
-            filebotNameSelection.setQuery(response);
+            telegramFilebotExecution.setQuery(response);
         }
         producerService.sendFilebotExecution(
-                getFilebotExecutionODTO(filebotNameSelection));
-        filebotNameSelection.setStatus(FilebotNameStatus.PROCESSED);
-        filebotNameRepository.save(filebotNameSelection);
+                getFilebotExecutionODTO(telegramFilebotExecution));
+        telegramFilebotExecution.setStatus(FilebotNameStatus.PROCESSED);
+        telegramFilebotExecutionRepository.save(telegramFilebotExecution);
         if (Objects.nonNull(messageId)) {
             sendMessageToEditedMessage(chatId, messageId,
                     String.format("Texto para forzar la query del contenido: %s", response));
@@ -264,9 +274,13 @@ public class FilebotServiceImpl implements FilebotService {
             cleanInlineKeyboard(chatId);
             sendMessage("Guardado y procesado", chatId);
         }
-        log.info("Processed filebotNameSelectionId: " +
-                filebotNameSelection.getPath());
-        processNotProcessing(chatId);
+        log.info("Processed telegramFilebotExecutionId: " +
+                telegramFilebotExecution.getPath());
+        TelegramConversation telegramConversation = telegramConversationRepository.findByChatId(chatId).get();
+        telegramConversation.setStatus(
+                TelegramStatus.IDLE);
+        telegramConversationRepository.save(telegramConversation);
+        processNotProcessing();
     }
 
     private void cleanInlineKeyboard(String chatId) {
@@ -295,7 +309,7 @@ public class FilebotServiceImpl implements FilebotService {
                         filebotNameSelection.isForceStrict() ? "Strict" : "Opportunistic"));
         sendMessageToForceQuery(chatId);
         filebotNameSelection.setStatus(FilebotNameStatus.PROCESSING_QUERY);
-        filebotNameRepository.save(filebotNameSelection);
+        telegramFilebotExecutionRepository.save(filebotNameSelection);
     }
 
     private void handleProcessingLabel(TelegramFilebotExecution filebotNameSelection, String response, String chatId,
@@ -322,7 +336,7 @@ public class FilebotServiceImpl implements FilebotService {
                 sb.toString(), filebotNameSelection.getPath(), response));
         sendMessageToForceStrict(chatId);
         filebotNameSelection.setStatus(FilebotNameStatus.PROCESSING_FORCE_STRICT);
-        filebotNameRepository.save(filebotNameSelection);
+        telegramFilebotExecutionRepository.save(filebotNameSelection);
     }
 
     @Override
@@ -333,7 +347,7 @@ public class FilebotServiceImpl implements FilebotService {
     @Override
     public void handleCallbackResponse(String chatId, String messageId, String response) {
         log.info("Handle callback message");
-        filebotNameRepository.findByStatusStartsWith("PROCESSING").ifPresent(
+        telegramFilebotExecutionRepository.findByStatusStartsWith("PROCESSING").ifPresent(
                 (filebotNameSelection) -> {
                     handleProcessing(filebotNameSelection, response, chatId, messageId);
                 });
@@ -345,7 +359,7 @@ public class FilebotServiceImpl implements FilebotService {
         List<TelegramConversation> telegramConversations = telegramConversationRepository.findAllByStatus(
                 TelegramStatus.WAITING_USER_RESPONSE.toString());
         String messageId = telegramConversations.size() == 1 ? telegramConversations.get(0).getMessageId() : null;
-        filebotNameRepository.findByStatusStartsWith("PROCESSING").ifPresent(
+        telegramFilebotExecutionRepository.findByStatusStartsWith("PROCESSING").ifPresent(
                 (filebotNameSelection) -> {
                     handleProcessing(filebotNameSelection, response, chatId, messageId);
                 });
@@ -382,15 +396,6 @@ public class FilebotServiceImpl implements FilebotService {
         return inlineKeyboardMarkup;
     }
 
-    @Override
-    public void saveMessageId(String chatId, String messageId) {
-        log.info("Save message id");
-        TelegramConversation telegramConversation = telegramConversationRepository.findByChatId(chatId);
-        telegramConversation.setMessageId(messageId);
-        telegramConversation.setStatus(TelegramStatus.WAITING_USER_RESPONSE);
-        telegramConversationRepository.save(telegramConversation);
-    }
-
     private String abbreviate(String str, int size) {
         if (str.length() <= size)
             return str;
@@ -409,35 +414,37 @@ public class FilebotServiceImpl implements FilebotService {
         return filebotNameSelection;
     }
 
-    private void processNotProcessing(String chatId) {
-        log.info("processNotProcessing EMPTY method...");
-        TelegramConversation telegramConversation = telegramConversationRepository.findByChatId(chatId);
-        if (Boolean.FALSE.equals(filebotNameRepository
-                .findByStatusStartsWith("PROCESSING").isPresent())) {
-            List<TelegramFilebotExecution> filebots = filebotNameRepository
-                    .findAllByStatus(FilebotNameStatus.UNPROCESSING.name());
-            if (Boolean.FALSE.equals(filebots.isEmpty())) {
-                TelegramFilebotExecution filebotNameSelection = filebots.get(0);
-                if (filebotNameSelection.getPossibilities().isEmpty()) {
-                    handleFilebotWithoutPosibilities(filebotNameSelection, chatId);
-                } else {
-                    handleFilebotWithPossibilities(filebotNameSelection, chatId);
-                }
-                telegramConversation.setStatus(TelegramStatus.WAITING_USER_RESPONSE);
-            } else {
-                telegramConversation.setStatus(TelegramStatus.IDLE);
-            }
-        } else {
-            log.info("No filebots to process");
-            sendMessage("En estos momentos no hay ninguna acción más que realizar", chatId);
-            telegramConversation.setStatus(TelegramStatus.IDLE);
-        }
-        telegramConversationRepository.save(telegramConversation);
-    }
+    // private void processNotProcessing(String chatId) {
+    // log.info("processNotProcessing EMPTY method...");
+    // TelegramConversation telegramConversation =
+    // telegramConversationRepository.findByChatId(chatId);
+    // if (Boolean.FALSE.equals(telegramFilebotExecutionRepository
+    // .findByStatusStartsWith("PROCESSING").isPresent())) {
+    // List<TelegramFilebotExecution> filebots = telegramFilebotExecutionRepository
+    // .findAllByStatus(FilebotNameStatus.UNPROCESSING.name());
+    // if (Boolean.FALSE.equals(filebots.isEmpty())) {
+    // TelegramFilebotExecution filebotNameSelection = filebots.get(0);
+    // if (filebotNameSelection.getPossibilities().isEmpty()) {
+    // handleFilebotWithoutPosibilities(filebotNameSelection, chatId);
+    // } else {
+    // handleFilebotWithPossibilities(filebotNameSelection, chatId);
+    // }
+    // telegramConversation.setStatus(TelegramStatus.WAITING_USER_RESPONSE);
+    // } else {
+    // telegramConversation.setStatus(TelegramStatus.IDLE);
+    // }
+    // } else {
+    // log.info("No filebots to process");
+    // sendMessage("En estos momentos no hay ninguna acción más que realizar",
+    // chatId);
+    // telegramConversation.setStatus(TelegramStatus.IDLE);
+    // }
+    // telegramConversationRepository.save(telegramConversation);
+    // }
 
     @Override
     public void stopConversation(String chatId) {
-        TelegramConversation telegramConversation = telegramConversationRepository.findByChatId(chatId);
+        TelegramConversation telegramConversation = telegramConversationRepository.findByChatId(chatId).get();
         telegramConversation.setStatus(TelegramStatus.STOPPED);
         telegramConversationRepository.save(telegramConversation);
         sendMessage("La conversación ha sido detenida", chatId);
@@ -446,16 +453,16 @@ public class FilebotServiceImpl implements FilebotService {
     @Override
     public void resetAllStatus() {
         List<TelegramConversation> telegramConversations = telegramConversationRepository.findAll();
-        List<TelegramFilebotExecution> telegramFilebotExecutions = filebotNameRepository.findAll();
+        List<TelegramFilebotExecution> telegramFilebotExecutions = telegramFilebotExecutionRepository.findAll();
         for (TelegramFilebotExecution telegramFilebotExecution : telegramFilebotExecutions) {
             telegramFilebotExecution.setStatus(FilebotNameStatus.UNPROCESSING);
-            filebotNameRepository.save(telegramFilebotExecution);
+            telegramFilebotExecutionRepository.save(telegramFilebotExecution);
         }
         for (TelegramConversation telegramConversation : telegramConversations) {
             telegramConversation.setStatus(TelegramStatus.IDLE);
             telegramConversationRepository.save(telegramConversation);
-            sendMessage("La conversación ha sido reiniciada", telegramConversation.getChatId());
-            processNotProcessing(telegramConversation.getChatId());
+            sendMessage("La conversación ha sido reiniciada para todos los usuarios", telegramConversation.getChatId());
         }
+        processNotProcessing();
     }
 }

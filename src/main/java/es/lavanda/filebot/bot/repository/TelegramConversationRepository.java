@@ -1,6 +1,7 @@
 package es.lavanda.filebot.bot.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
@@ -12,7 +13,7 @@ public interface TelegramConversationRepository extends MongoRepository<Telegram
 
     List<TelegramConversation> findAllByStatus(String status);
 
-    TelegramConversation findByChatId(String chatId);
+    Optional<TelegramConversation> findByChatId(String chatId);
 
     boolean existsByChatId(String chatId);
 }
