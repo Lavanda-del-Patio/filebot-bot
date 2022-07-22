@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import es.lavanda.filebot.bot.config.FilebotBotConfig;
+import es.lavanda.filebot.bot.exception.FilebotBotException;
 import es.lavanda.filebot.bot.service.FilebotService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,14 +58,14 @@ public class FilebotHandler extends TelegramLongPollingBot {
         }
     }
 
-    public void sendMessage(SendMessage sendMessage) {
+    public String sendMessage(SendMessage sendMessage) {
         try {
             sendMessage.enableMarkdown(true);
             Message message = execute(sendMessage);
-            saveMessageId(message.getChatId(), message.getMessageId());
+            return message.getMessageId().toString();
         } catch (TelegramApiException e) {
             log.error("Telegram exception sendind message with keyboard", e);
-            // throw e;
+            throw new FilebotBotException("Telegram exception sendind message with keyboard", e);
         }
     }
 
@@ -86,10 +87,6 @@ public class FilebotHandler extends TelegramLongPollingBot {
             log.error("Telegram exception deleteMessage message with keyboard", e);
             // throw e;
         }
-    }
-
-    private void saveMessageId(Long chatId, Integer messageId) {
-        filebotServiceImpl.saveMessageId(String.valueOf(chatId), String.valueOf(messageId));
     }
 
     private void handleIncomingMessage(Message message) throws TelegramApiException {

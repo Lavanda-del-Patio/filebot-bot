@@ -23,7 +23,7 @@ public class TelegramConversation {
     private TelegramStatus status;
 
     public enum TelegramStatus {
-        STARTED, IDLE, WAITING_USER_RESPONSE, STOPPED;
+        IDLE, WAITING_USER_RESPONSE, STOPPED;
 
     }
 }
