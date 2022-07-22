@@ -455,8 +455,11 @@ public class FilebotServiceImpl implements FilebotService {
         List<TelegramConversation> telegramConversations = telegramConversationRepository.findAll();
         List<TelegramFilebotExecution> telegramFilebotExecutions = telegramFilebotExecutionRepository.findAll();
         for (TelegramFilebotExecution telegramFilebotExecution : telegramFilebotExecutions) {
-            telegramFilebotExecution.setStatus(FilebotNameStatus.UNPROCESSING);
-            telegramFilebotExecutionRepository.save(telegramFilebotExecution);
+            if (telegramFilebotExecution
+                    .getStatus().toString().startsWith("PROCESSING")) {
+                telegramFilebotExecution.setStatus(FilebotNameStatus.UNPROCESSING);
+                telegramFilebotExecutionRepository.save(telegramFilebotExecution);
+            }
         }
         for (TelegramConversation telegramConversation : telegramConversations) {
             if (Boolean.FALSE.equals(telegramConversation.getStatus().equals(TelegramStatus.STOPPED))) {
