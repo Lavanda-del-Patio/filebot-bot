@@ -459,9 +459,12 @@ public class FilebotServiceImpl implements FilebotService {
             telegramFilebotExecutionRepository.save(telegramFilebotExecution);
         }
         for (TelegramConversation telegramConversation : telegramConversations) {
-            telegramConversation.setStatus(TelegramStatus.IDLE);
-            telegramConversationRepository.save(telegramConversation);
-            sendMessage("La conversación ha sido reiniciada para todos los usuarios", telegramConversation.getChatId());
+            if (Boolean.FALSE.equals(telegramConversation.getStatus().equals(TelegramStatus.STOPPED))) {
+                telegramConversation.setStatus(TelegramStatus.IDLE);
+                telegramConversationRepository.save(telegramConversation);
+                sendMessage("La conversación ha sido reiniciada para todos los usuarios activos",
+                        telegramConversation.getChatId());
+            }
         }
         processNotProcessing();
     }

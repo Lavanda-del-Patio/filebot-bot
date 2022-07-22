@@ -2,6 +2,7 @@ package es.lavanda.filebot.bot.handler;
 
 import java.util.Objects;
 
+import org.junit.platform.commons.util.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -9,6 +10,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.inlinequery.InlineQuery;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import es.lavanda.filebot.bot.config.FilebotBotConfig;
@@ -39,13 +41,13 @@ public class FilebotHandler extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         try {
             if (update.hasMessage() && isAuthorized(update.getMessage().getFrom().getUserName())) {
-                log.info("Authorized");
+                log.info("Authorized message");
                 Message message = update.getMessage();
                 if (message.hasText()) {
                     handleIncomingMessage(message);
                 }
             } else if (Objects.nonNull(update.getCallbackQuery())) {
-                log.info("Authorized");
+                log.info("Authorized getCallbackQuery");
                 Message message = update.getCallbackQuery().getMessage();
                 if (message.hasText()) {
                     handleCallbackMessage(update.getCallbackQuery());
