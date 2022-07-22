@@ -102,6 +102,8 @@ public class FilebotHandler extends TelegramLongPollingBot {
             }
         } else if (message.getText().startsWith("/stop")) {
             filebotServiceImpl.stopConversation(String.valueOf(message.getChatId()));
+        } else if (message.getText().startsWith("/reset")) {
+            filebotServiceImpl.resetAllStatus();
         } else {
             filebotServiceImpl.handleIncomingResponse(String.valueOf(message.getChatId()), message.getText());
         }

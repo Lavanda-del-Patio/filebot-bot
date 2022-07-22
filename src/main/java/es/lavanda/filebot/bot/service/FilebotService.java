@@ -8,7 +8,7 @@ public interface FilebotService {
 
     void run(FilebotExecutionIDTO filebotExecutionIDTO);
 
-    void newConversation(String chatId,String name);
+    void newConversation(String chatId, String name);
 
     void stopConversation(String chatId);
 
@@ -21,6 +21,8 @@ public interface FilebotService {
     void setFilebotHandler(FilebotHandler filebotHandler);
 
     void processNotProcessing(TelegramFilebotExecution filebotNameSelection);
+
+    void resetAllStatus();
 
     // void processNotProcessing(String chatId);
 
