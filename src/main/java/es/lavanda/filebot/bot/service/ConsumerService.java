@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import es.lavanda.filebot.bot.model.TelegramFilebotExecution;
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
+import es.lavanda.lib.common.model.TelegramFilebotExecutionODTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,11 +22,11 @@ public class ConsumerService {
         filebotService.run(filebotExecutionIDTO);
         log.info("Finish message of the queue filebot-telegram");
     }
-    
-    @RabbitListener(queues = "telegram-execution")
-    public void consumeMessageFeedFilms(TelegramFilebotExecution filebotExecutionIDTO) {
-        log.info("Reading message of the queue filebot-telegram: {}", filebotExecutionIDTO);
-        filebotService.processNotProcessing(filebotExecutionIDTO);
-        log.info("Finish message of the queue filebot-telegram");
+
+    @RabbitListener(queues = "telegram-query-tmdb-resolution")
+    public void consumeMessageFeedFilms(TelegramFilebotExecutionODTO telegramFilebotExecutionODTO) {
+        log.info("Reading message of the queue telegram-query-tmdb-resolution: {}", telegramFilebotExecutionODTO);
+        filebotService.recieveTMDBData(telegramFilebotExecutionODTO);
+        log.info("Finish message of the queue telegram-query-tmdb-resolution");
     }
 }

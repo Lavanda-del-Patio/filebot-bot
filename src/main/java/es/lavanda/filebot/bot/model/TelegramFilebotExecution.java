@@ -2,7 +2,9 @@ package es.lavanda.filebot.bot.model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -10,6 +12,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import es.lavanda.lib.common.model.tmdb.search.TMDBResultDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -38,6 +41,8 @@ public class TelegramFilebotExecution implements Serializable {
 
     private String selectedPossibilitie;
 
+    private Map<String, TMDBResultDTO> possibleChoicesTMDB = new HashMap<>();
+
     @CreatedDate
     @Field("created_at")
     private Date createdAt;
@@ -47,7 +52,8 @@ public class TelegramFilebotExecution implements Serializable {
     private Date lastModifiedAt;
 
     public enum FilebotNameStatus {
-        UNPROCESSING, PROCESSING_LABEL, PROCESSING_FORCE_STRICT, PROCESSING_QUERY, PROCESSING_WITH_POSSIBILITIES, PROCESSED
-    
+        UNPROCESSING, PROCESSING_LABEL, PROCESSING_FORCE_STRICT, PROCESSING_TMDB_RESPONSE, PROCESSING_QUERY,
+        PROCESSING_WITH_POSSIBILITIES, PROCESSED
+
     }
 }

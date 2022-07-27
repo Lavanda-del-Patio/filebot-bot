@@ -3,6 +3,7 @@ package es.lavanda.filebot.bot.service;
 import es.lavanda.filebot.bot.handler.FilebotHandler;
 import es.lavanda.filebot.bot.model.TelegramFilebotExecution;
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
+import es.lavanda.lib.common.model.TelegramFilebotExecutionODTO;
 
 public interface FilebotService {
 
@@ -22,6 +23,6 @@ public interface FilebotService {
 
     void resetAllStatus();
 
-    // void processNotProcessing(String chatId);
+    void recieveTMDBData(TelegramFilebotExecutionODTO telegramFilebotExecutionODTO);
 
 }
