@@ -1,5 +1,8 @@
 package es.lavanda.filebot.bot.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -18,12 +21,14 @@ public class TelegramConversation {
 
     private String chatId;
 
-    private String messageId;
+    private String inlineKeyboardMessageId;
+
+    private List<String> otherMessageIds = new ArrayList<>();
 
     private TelegramStatus status;
 
     public enum TelegramStatus {
-        IDLE, WAITING_USER_RESPONSE, STOPPED;
+        IDLE, WAITING_USER_RESPONSE, WAITING_TMDB_RESPONSE, STOPPED;
 
     }
 }

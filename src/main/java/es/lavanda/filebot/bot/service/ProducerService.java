@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import es.lavanda.filebot.bot.exception.FilebotBotException;
 import es.lavanda.filebot.bot.model.TelegramFilebotExecution;
 import es.lavanda.lib.common.model.FilebotExecutionODTO;
+import es.lavanda.lib.common.model.TelegramFilebotExecutionIDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,13 +28,13 @@ public class ProducerService {
         }
     }
 
-    public void sendTelegramExecution(TelegramFilebotExecution filebot) {
+    public void sendTelegramExecutionForTMDB(TelegramFilebotExecutionIDTO telegramFilebotExecutionIDTO) {
         try {
-            log.info("Sending message to queue {}", "telegram-execution");
-            rabbitTemplate.convertAndSend("telegram-execution", filebot);
+            log.info("Sending message to queue {}", "telegram-query-tmdb");
+            rabbitTemplate.convertAndSend("telegram-query-tmdb", telegramFilebotExecutionIDTO);
             log.info("Sended message to queue");
         } catch (Exception e) {
-            log.error("Failed send message to queue {}", "telegram-execution", e);
+            log.error("Failed send message to queue {}", "telegram-query-tmdb", e);
             throw new FilebotBotException("Failed send message to queue", e);
         }
     }

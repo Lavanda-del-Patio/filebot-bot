@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.junit.platform.commons.util.StringUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -68,6 +69,16 @@ public class FilebotHandler extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             log.error("Telegram exception sendind message with keyboard", e);
             throw new FilebotBotException("Telegram exception sendind message with keyboard", e);
+        }
+    }
+
+    public String sendPhoto(SendPhoto sendPhoto) {
+        try {
+            Message message = execute(sendPhoto);
+            return message.getMessageId().toString();
+        } catch (TelegramApiException e) {
+            log.error("Telegram exception sendind photo", e);
+            throw new FilebotBotException("Telegram exception sendind photo", e);
         }
     }
 
