@@ -1,6 +1,7 @@
 package es.lavanda.filebot.bot.config;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -11,6 +12,7 @@ import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.meta.generics.LongPollingBot;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
@@ -34,6 +36,8 @@ public class AppBeans {
     @Autowired
     private FilebotBotConfig botConfig;
 
+    private BotSession botSession;
+
     @PostConstruct
     public void start() {
         log.info("Instantiate Telegram Bots API...");
@@ -42,11 +46,19 @@ public class AppBeans {
             FilebotHandler filebotHandler = new FilebotHandler(
                     filebotService, botConfig);
             filebotService.setFilebotHandler(filebotHandler);
-            botsApi.registerBot(
+            botSession = botsApi.registerBot(
                     filebotHandler);
+
         } catch (TelegramApiException e) {
             log.error("Exception instantiate Telegram Bot!", e);
             throw new FilebotBotException(e);
         }
+    }
+
+    @PreDestroy
+    public void preDestroy() {
+        log.info("PreDestroy BOT");
+        botSession.stop();
+        log.info("Destroyed");
     }
 }
