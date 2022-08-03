@@ -47,6 +47,28 @@ jobs:
           registry_password: ${{ secrets.DOCKER_PASSWORD }}
           github_workspace: $GITHUB_WORKSPACE
           github_token: ${{ secrets.DEPLOY_GITHUB_TOKEN }} 
+  pull-request:
+    runs-on: ubuntu-latest
+    if: (github.ref == 'refs/heads/develop')  && (github.event_name == 'push')  
+    steps:
+    - uses: actions/checkout@v2
+    - name: pull-request
+      uses: repo-sync/pull-request@v2
+      id: open-pr
+      with:
+        destination_branch: "main"
+        github_token: ${{ secrets.GITHUB_TOKEN }}      
+    - name: Send telegram message
+      uses: appleboy/telegram-action@master
+      with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            New pull-request: 
+            
+            Repository: ${{ github.repository }}
+
+            See on: ${{steps.open-pr.outputs.pr_url}}                    
   next-snapshot:
     needs: release-build-push-docker
     if: (github.ref == 'refs/heads/main')  && (github.event_name == 'push')  
