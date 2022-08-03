@@ -50,7 +50,7 @@ jobs:
   pull-request:
     runs-on: ubuntu-latest
     needs: release-build-push-docker
-    if: (github.ref == 'refs/heads/develop')  && (github.event_name == 'push')  && ()
+    if: (github.ref == 'refs/heads/develop')  && (github.event_name == 'push')  
     steps:
     - uses: actions/checkout@v2
     - name: pull-request
