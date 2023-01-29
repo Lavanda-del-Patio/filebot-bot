@@ -17,6 +17,9 @@ public class RabbitMQConfig {
     public static final String QUEUE_TELEGRAM_QUERY_TMDB_RESOLUTION = "telegram-query-tmdb-resolution";
     public static final String QUEUE_TELEGRAM_QUERY_TMDB_RESOLUTION_DLQ = "telegram-query-tmdb-resolution-dlq";
 
+    public static final String QUEUE_TELEGRAM_MESSAGES = "filebot-telegram-messages";
+    public static final String QUEUE_TELEGRAM_MESSAGES_DLQ = "filebot-telegram-messages-dlq";
+
     public static final String EXCHANGE_MESSAGES = "lavandadelpatio-exchange";
 
     @Bean
@@ -55,4 +58,21 @@ public class RabbitMQConfig {
     Queue deadLetterQueueTelegramTMDBResolution() {
         return QueueBuilder.durable(QUEUE_TELEGRAM_QUERY_TMDB_RESOLUTION_DLQ).build();
     }
+
+    @Bean
+    Binding bindingMessagesTelegram() {
+        return BindingBuilder.bind(messagesQueue()).to(messagesExchange()).with(QUEUE_TELEGRAM_MESSAGES);
+    }
+
+    @Bean
+    Queue messagesQueueTelegram() {
+        return QueueBuilder.durable(QUEUE_TELEGRAM_MESSAGES).withArgument("x-dead-letter-exchange", "")
+                .withArgument("x-dead-letter-routing-key", QUEUE_TELEGRAM_MESSAGES_DLQ).build();
+    }
+
+    @Bean
+    Queue deadLetterQueueTelegram() {
+        return QueueBuilder.durable(QUEUE_TELEGRAM_MESSAGES_DLQ).build();
+    }
+
 }

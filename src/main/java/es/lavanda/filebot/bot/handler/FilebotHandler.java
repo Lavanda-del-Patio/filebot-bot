@@ -77,8 +77,8 @@ public class FilebotHandler extends TelegramLongPollingBot {
             Message message = execute(sendPhoto);
             return message.getMessageId().toString();
         } catch (TelegramApiException e) {
-            log.error("Telegram exception sendind photo", e);
-            throw new FilebotBotException("Telegram exception sendind photo", e);
+            log.error("Telegram exception sending photo", e);
+            throw new FilebotBotException("Telegram exception sending photo", e);
         }
     }
 
@@ -88,8 +88,7 @@ public class FilebotHandler extends TelegramLongPollingBot {
             execute(sendMessage);
         } catch (TelegramApiException e) {
             log.error("Telegram exception sendind message with keyboard", e);
-            // throw e;
-
+            throw new FilebotBotException("Telegram exception sendind edit message", e);
         }
     }
 
@@ -98,7 +97,7 @@ public class FilebotHandler extends TelegramLongPollingBot {
             execute(deleteMessage);
         } catch (TelegramApiException e) {
             log.error("Telegram exception deleteMessage message with keyboard", e);
-            // throw e;
+            throw new FilebotBotException("Telegram exception deleting message", e);
         }
     }
 

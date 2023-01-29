@@ -1,6 +1,6 @@
 spring:
   application:
-    name: lavanda-filebot-parser
+    name: lavanda-filebot-bot
   profiles:
     active: dev
   rabbitmq:
