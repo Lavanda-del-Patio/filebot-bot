@@ -2,9 +2,14 @@ package es.lavanda.filebot.bot.service;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import es.lavanda.filebot.bot.exception.FilebotBotException;
 import es.lavanda.filebot.bot.model.TelegramFilebotExecution;
+import es.lavanda.filebot.bot.model.TelegramMessage;
 import es.lavanda.lib.common.model.FilebotExecutionODTO;
 import es.lavanda.lib.common.model.TelegramFilebotExecutionIDTO;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +40,17 @@ public class ProducerService {
             log.info("Sended message to queue");
         } catch (Exception e) {
             log.error("Failed send message to queue {}", "telegram-query-tmdb", e);
+            throw new FilebotBotException("Failed send message to queue", e);
+        }
+    }
+
+    public void sendTelegramMessages(TelegramMessage telegramMessage) {
+        try {
+            log.info("Sending message to queue {} with the data {}", "filebot-telegram-messages", telegramMessage);
+            rabbitTemplate.convertAndSend("filebot-telegram-messages", telegramMessage);
+            log.info("Sended message to queue");
+        } catch (Exception e) {
+            log.error("Failed send message to queue {}", "filebot-telegram-messages", e);
             throw new FilebotBotException("Failed send message to queue", e);
         }
     }
