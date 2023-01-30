@@ -625,17 +625,20 @@ public class FilebotServiceImpl implements FilebotService {
     }
 
     private void sendMessageTelegramMessage(TelegramMessage message) {
-        SendMessage toSend = modelMapper.map(message, SendMessage.class);
-        if (Boolean.TRUE.equals(message.isSaveOnDatabase())) {
-            TelegramConversation telegramConversation = telegramConversationRepository.findByChatId(message.getChatId())
-                    .get();
-            if (Objects.nonNull(telegramConversation)) {
-                String messageId = filebotHandler.sendMessage(toSend);
-                telegramConversation.getOtherMessageIds().add(messageId);
-                telegramConversationRepository.save(telegramConversation);
+        if (StringUtils.hasText(message.getText())) {
+            SendMessage toSend = modelMapper.map(message, SendMessage.class);
+            if (Boolean.TRUE.equals(message.isSaveOnDatabase())) {
+                TelegramConversation telegramConversation = telegramConversationRepository
+                        .findByChatId(message.getChatId())
+                        .get();
+                if (Objects.nonNull(telegramConversation)) {
+                    String messageId = filebotHandler.sendMessage(toSend);
+                    telegramConversation.getOtherMessageIds().add(messageId);
+                    telegramConversationRepository.save(telegramConversation);
+                }
+            } else {
+                filebotHandler.sendMessage(toSend);
             }
-        } else {
-            filebotHandler.sendMessage(toSend);
         }
     }
 
@@ -668,9 +671,7 @@ public class FilebotServiceImpl implements FilebotService {
     public void sendMessage(TelegramMessage message) {
         switch (message.getType()) {
             case TEXT:
-                if (StringUtils.hasText(message.getText())) {
-                    sendMessageTelegramMessage(message);
-                }
+                sendMessageTelegramMessage(message);
                 break;
             case PHOTO:
                 sendPhotoTelegramMessage(message);
