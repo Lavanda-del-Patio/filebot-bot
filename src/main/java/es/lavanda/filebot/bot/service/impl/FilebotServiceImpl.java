@@ -141,7 +141,7 @@ public class FilebotServiceImpl implements FilebotService {
             }
         }
     }
-    
+
     public void processNotProcessing() {
         log.info("processNotProcessing with list of chatIds...");
         if (Boolean.FALSE.equals(telegramFilebotExecutionRepository
@@ -668,7 +668,9 @@ public class FilebotServiceImpl implements FilebotService {
     public void sendMessage(TelegramMessage message) {
         switch (message.getType()) {
             case TEXT:
-                sendMessageTelegramMessage(message);
+                if (StringUtils.hasText(message.getText())) {
+                    sendMessageTelegramMessage(message);
+                }
                 break;
             case PHOTO:
                 sendPhotoTelegramMessage(message);
