@@ -267,7 +267,7 @@ public class FilebotServiceImpl implements FilebotService {
     private void createSendPhotoAndSendToRabbit(String overview, String photo, String chatId, boolean saveOnDatabase) {
         TelegramMessage sendPhoto = new TelegramMessage();
         sendPhoto.setType(MessageType.PHOTO);
-        sendPhoto.setCaption(overview);
+        sendPhoto.setCaption((abbreviate(overview, 3000)));
         sendPhoto.setSaveOnDatabase(saveOnDatabase);
         InputFile inputFile = new InputFile();
         inputFile.setMedia(photo);
@@ -486,7 +486,7 @@ public class FilebotServiceImpl implements FilebotService {
         TelegramMessage newMessage = new TelegramMessage();
         newMessage.setChatId(chatId);
         newMessage.setMessageId(Integer.parseInt(messageId));
-        newMessage.setText(response);
+        newMessage.setText(abbreviate(response, 3000));
         newMessage.setType(MessageType.EDIT_MESSAGE);
         producerService.sendTelegramMessages(newMessage);
 
