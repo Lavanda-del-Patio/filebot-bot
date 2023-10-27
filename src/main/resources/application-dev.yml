@@ -3,22 +3,31 @@ spring:
     mongodb:
       authentication-database: admin
       database: lavanda
-      host: localhost
+      host: 192.168.5.150
       password: example
       port: 27017
       username: root
   rabbitmq:
+    host: 192.168.5.150
+    port: 5672
+    username: user
+    password: bitnami
     listener:
       simple:
         retry:
           enabled: true
-          initial-interval: 20s
-          max-attempts: 10
-          max-interval: 300000
-          multiplier: 3
+          initial-interval: 3s
+          max-attempts: 1
+          max-interval: 10s
+          multiplier: 2
 telegram:
-  filebotbot:
+  filebot:
     token: 5025549707:AAGfWqnBULjz1F67Jx8KvvF6hKdsIgfd-SU
     username: testingbot
+    authorized:
+      usernames: luisca_jl, CarlUndert, Vatalx, chemg, Neblinio
+  classify:
+    token: 6962428069:AAENbYJKnm0uRskifwJ8JXcIBTHeR5KKdmg
+    username: filebotexecutor
     authorized:
       usernames: luisca_jl, CarlUndert, Vatalx, chemg, Neblinio
