@@ -3,6 +3,10 @@ spring:
     name: lavanda-filebot-bot
   profiles:
     active: dev
+  amqp:
+    deserialization:
+      trust:
+        all: true  
   rabbitmq:
     host: localhost
     port: 5672
