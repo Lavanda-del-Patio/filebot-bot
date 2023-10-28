@@ -74,10 +74,10 @@ public class FilebotService {
     private Set<Elected> electeds = new HashSet<>(3);
 
     public void run(FilebotExecutionIDTO filebotExecutionIDTO) {
-        FilebotExecution telegramFilebotExecution = convertToModel(filebotExecutionIDTO);
-        telegramFilebotExecution.setStatus(FilebotNameStatus.UNPROCESSING);
-        filebotExecutionRepository.save(telegramFilebotExecution);
-        processNotProcessing(telegramFilebotExecution);
+        FilebotExecution filebotExecution = convertToModel(filebotExecutionIDTO);
+        filebotExecution.setStatus(FilebotNameStatus.UNPROCESSING);
+        filebotExecutionRepository.save(filebotExecution);
+        processNotProcessing(filebotExecution);
         // producerService.sendTelegramExecution(telegramFilebotExecution);
     }
 
@@ -316,8 +316,7 @@ public class FilebotService {
         inputFile.setMedia(photo);
         sendPhoto.setPhoto(inputFile);
         sendPhoto.setChatId(chatId);
-                sendPhoto.setHandler(filebotHandler);
-
+        sendPhoto.setHandler(filebotHandler);
         producerService.sendTelegramMessage(sendPhoto);
     }
 
@@ -599,8 +598,7 @@ public class FilebotService {
         newMessage.setMessageId(Integer.parseInt(messageId));
         newMessage.setText(abbreviate(response, 3000));
         newMessage.setType(MessageType.EDIT_MESSAGE);
-                        newMessage.setHandler(filebotHandler);
-
+        newMessage.setHandler(filebotHandler);
         producerService.sendTelegramMessage(newMessage);
 
     }
@@ -610,8 +608,7 @@ public class FilebotService {
         deleteMessage.setChatId(chatId);
         deleteMessage.setMessageId(Integer.parseInt(messageId));
         deleteMessage.setType(MessageType.DELETE_MESSAGE);
-                                deleteMessage.setHandler(filebotHandler);
-
+        deleteMessage.setHandler(filebotHandler);
         producerService.sendTelegramMessage(deleteMessage);
     }
 
