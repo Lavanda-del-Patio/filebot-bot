@@ -12,7 +12,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import es.lavanda.telegram.bots.common.model.MessageHandler;
 import es.lavanda.telegram.bots.common.model.TelegramMessage;
 import es.lavanda.telegram.bots.filebot.config.FilebotConfig;
 import es.lavanda.telegram.bots.filebot.exception.FilebotException;
@@ -22,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @AllArgsConstructor
-public class FilebotHandler extends TelegramLongPollingBot implements MessageHandler {
+public class FilebotHandler extends TelegramLongPollingBot {
 
     private FilebotService filebotService;
 
@@ -135,36 +134,5 @@ public class FilebotHandler extends TelegramLongPollingBot implements MessageHan
         return botConfig.isAuthorizedToUseBot(username);
     }
 
-    @Override
-    public void handle(TelegramMessage message) {
-        switch (message.getType()) {
-            case TEXT:
-                SendMessage sendMessage = new SendMessage();
-                sendMessage.setChatId(message.getChatId());
-                sendMessage.setText(message.getText());
-                sendMessage(sendMessage);
-                break;
-            case PHOTO:
-                SendPhoto sendPhoto = new SendPhoto();
-                sendPhoto.setChatId(message.getChatId());
-                sendPhoto.setPhoto(message.getPhoto());
-                sendPhoto(sendPhoto);
-                break;
-            case EDIT_MESSAGE:
-                EditMessageText editMessageText = new EditMessageText();
-                editMessageText.setChatId(message.getChatId());
-                editMessageText.setMessageId(message.getMessageId());
-                editMessageText.setText(message.getText());
-                sendEditMessage(editMessageText);
-                break;
-            case DELETE_MESSAGE:
-                DeleteMessage deleteMessage = new DeleteMessage();
-                deleteMessage.setChatId(message.getChatId());
-                deleteMessage.setMessageId(message.getMessageId());
-                deleteMessage(deleteMessage);
-                break;
-            default:
-                break;
-        }
-    }
+   
 }

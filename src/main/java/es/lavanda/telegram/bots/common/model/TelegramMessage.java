@@ -28,7 +28,11 @@ public class TelegramMessage implements Serializable {
 
     private ReplyKeyboard replyMarkup;
 
-    private MessageHandler handler;
+    private Handler handler;
+
+    public enum Handler {
+        FILEBOT, CLASSIFY
+    }
 
     public enum MessageType {
         TEXT, PHOTO, EDIT_MESSAGE, DELETE_MESSAGE
