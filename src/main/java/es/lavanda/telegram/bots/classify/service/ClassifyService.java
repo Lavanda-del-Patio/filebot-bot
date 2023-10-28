@@ -287,4 +287,14 @@ public class ClassifyService {
         classifyHandler.deleteMessage(toSend);
     }
 
+    public void reset() {
+        List<ClassifyConversation> classifyConversations = classifyConversationRepository.findAll();
+        for (ClassifyConversation classifyConversation : classifyConversations) {
+            classifyConversation.setStatus(ClassifyConversationStatus.IDLE);
+            classifyConversationRepository.save(classifyConversation);
+            createSendMessageAndSendToRabbit("Reset status", classifyConversation.getChatId(), false);
+        }
+        processNotProcessing();
+    }
+
 }

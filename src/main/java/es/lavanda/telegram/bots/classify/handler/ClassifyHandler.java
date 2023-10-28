@@ -121,9 +121,9 @@ public class ClassifyHandler extends TelegramLongPollingBot implements MessageHa
         } else if (message.getText().startsWith("/stop")) {
             classifyService.stopConversation(String.valueOf(message.getChatId()));
         }
-        // else if (message.getText().startsWith("/reset")) {
-        // classifyService.resetAllStatus();
-        // }
+        else if (message.getText().startsWith("/reset")) {
+            classifyService.reset();
+        }
         else {
             classifyService.handleIncomingResponse(String.valueOf(message.getChatId()), message.getText());
         }
