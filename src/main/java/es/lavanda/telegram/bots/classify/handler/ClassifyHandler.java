@@ -17,7 +17,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import es.lavanda.telegram.bots.classify.config.ClassifyConfig;
 import es.lavanda.telegram.bots.classify.exception.ClassifyException;
 import es.lavanda.telegram.bots.classify.service.ClassifyService;
-import es.lavanda.telegram.bots.common.model.MessageHandler;
 import es.lavanda.telegram.bots.common.model.TelegramMessage;
 import es.lavanda.telegram.bots.filebot.config.FilebotConfig;
 import lombok.AllArgsConstructor;
@@ -26,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @AllArgsConstructor
-public class ClassifyHandler extends TelegramLongPollingBot implements MessageHandler {
+public class ClassifyHandler extends TelegramLongPollingBot {
 
     private ClassifyService classifyService;
 
@@ -120,11 +119,9 @@ public class ClassifyHandler extends TelegramLongPollingBot implements MessageHa
             }
         } else if (message.getText().startsWith("/stop")) {
             classifyService.stopConversation(String.valueOf(message.getChatId()));
-        }
-        else if (message.getText().startsWith("/reset")) {
+        } else if (message.getText().startsWith("/reset")) {
             classifyService.reset();
-        }
-        else {
+        } else {
             classifyService.handleIncomingResponse(String.valueOf(message.getChatId()), message.getText());
         }
     }
@@ -136,40 +133,6 @@ public class ClassifyHandler extends TelegramLongPollingBot implements MessageHa
 
     private boolean isAuthorized(String username) {
         return classifyConfig.isAuthorizedToUseBot(username);
-    }
-
-    @Override
-    public void handle(TelegramMessage message) {
-        switch (message.getType()) {
-            case TEXT:
-                SendMessage sendMessage = new SendMessage();
-                sendMessage.setChatId(message.getChatId());
-                sendMessage.setText(message.getText());
-                sendMessage(sendMessage);
-                break;
-            case PHOTO:
-                SendPhoto sendPhoto = new SendPhoto();
-                sendPhoto.setChatId(message.getChatId());
-                sendPhoto.setPhoto(message.getPhoto());
-                sendPhoto(sendPhoto);
-                break;
-            case EDIT_MESSAGE:
-                EditMessageText editMessageText = new EditMessageText();
-                editMessageText.setChatId(message.getChatId());
-                editMessageText.setMessageId(message.getMessageId());
-                editMessageText.setText(message.getText());
-                sendEditMessage(editMessageText);
-                break;
-            case DELETE_MESSAGE:
-                DeleteMessage deleteMessage = new DeleteMessage();
-                deleteMessage.setChatId(message.getChatId());
-                deleteMessage.setMessageId(message.getMessageId());
-                deleteMessage(deleteMessage);
-                break;
-            default:
-                break;
-
-        }
     }
 
 }

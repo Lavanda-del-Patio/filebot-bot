@@ -56,7 +56,16 @@ public class ConsumerService {
     @RabbitListener(queues = "telegram-messages")
     public void consumeMessageForSendMessages(TelegramMessage telegramMessage) {
         log.info("Reading message of the queue filebot-telegram-messages: {}", telegramMessage);
-        telegramMessage.getHandler().handle(telegramMessage);
+        switch (telegramMessage.getHandler()) {
+            case CLASSIFY:
+                classifyService.sendMessage(telegramMessage);
+                break;
+            case FILEBOT:
+                filebotService.sendMessage(telegramMessage);
+                break;
+            default:
+                break;
+        }
         log.info("Finish message of the queue filebot-telegram-messages");
     }
 

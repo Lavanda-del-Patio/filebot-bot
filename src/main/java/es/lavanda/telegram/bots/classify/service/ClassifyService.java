@@ -28,6 +28,7 @@ import es.lavanda.telegram.bots.classify.model.Qbittorrent;
 import es.lavanda.telegram.bots.classify.repository.ClassifyConversationRepository;
 import es.lavanda.telegram.bots.classify.repository.QbitorrentRepository;
 import es.lavanda.telegram.bots.common.model.TelegramMessage;
+import es.lavanda.telegram.bots.common.model.TelegramMessage.Handler;
 import es.lavanda.telegram.bots.common.model.TelegramMessage.MessageType;
 import es.lavanda.telegram.bots.common.service.MessageMapper;
 import es.lavanda.telegram.bots.common.service.ProducerService;
@@ -127,7 +128,7 @@ public class ClassifyService {
         sendMessageRequest.setReplyMarkup(getKeyboardRemove());
         sendMessageRequest.setSaveOnDatabase(saveOnDatabase);
         sendMessageRequest.setType(MessageType.TEXT);
-        sendMessageRequest.setHandler(classifyHandler);
+        sendMessageRequest.setHandler(Handler.CLASSIFY);
         // sendMessage(sendMessageRequest);
         producerService.sendTelegramMessage(sendMessageRequest);
     }

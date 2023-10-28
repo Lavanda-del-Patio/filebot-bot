@@ -34,6 +34,7 @@ import es.lavanda.lib.common.model.TelegramFilebotExecutionODTO;
 import es.lavanda.lib.common.model.tmdb.search.TMDBResultDTO;
 
 import es.lavanda.telegram.bots.common.model.TelegramMessage;
+import es.lavanda.telegram.bots.common.model.TelegramMessage.Handler;
 import es.lavanda.telegram.bots.common.model.TelegramMessage.MessageType;
 import es.lavanda.telegram.bots.common.service.MessageMapper;
 import es.lavanda.telegram.bots.common.service.ProducerService;
@@ -303,7 +304,7 @@ public class FilebotService {
         sendMessageRequest.setReplyMarkup(getKeyboardRemove());
         sendMessageRequest.setSaveOnDatabase(saveOnDatabase);
         sendMessageRequest.setType(MessageType.TEXT);
-        sendMessageRequest.setHandler(filebotHandler);
+        sendMessageRequest.setHandler(Handler.FILEBOT);
         producerService.sendTelegramMessage(sendMessageRequest);
     }
 
@@ -316,7 +317,7 @@ public class FilebotService {
         inputFile.setMedia(photo);
         sendPhoto.setPhoto(inputFile);
         sendPhoto.setChatId(chatId);
-        sendPhoto.setHandler(filebotHandler);
+        sendPhoto.setHandler(Handler.FILEBOT);
         producerService.sendTelegramMessage(sendPhoto);
     }
 
@@ -598,7 +599,7 @@ public class FilebotService {
         newMessage.setMessageId(Integer.parseInt(messageId));
         newMessage.setText(abbreviate(response, 3000));
         newMessage.setType(MessageType.EDIT_MESSAGE);
-        newMessage.setHandler(filebotHandler);
+        newMessage.setHandler(Handler.FILEBOT);
         producerService.sendTelegramMessage(newMessage);
 
     }
@@ -608,7 +609,7 @@ public class FilebotService {
         deleteMessage.setChatId(chatId);
         deleteMessage.setMessageId(Integer.parseInt(messageId));
         deleteMessage.setType(MessageType.DELETE_MESSAGE);
-        deleteMessage.setHandler(filebotHandler);
+        deleteMessage.setHandler(Handler.FILEBOT);
         producerService.sendTelegramMessage(deleteMessage);
     }
 
