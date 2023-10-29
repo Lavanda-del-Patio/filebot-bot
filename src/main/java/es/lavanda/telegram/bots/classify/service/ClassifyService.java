@@ -108,7 +108,7 @@ public class ClassifyService {
     private String sendMessageToSelectCategory(Qbittorrent qbittorrent, String chatId) {
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.setChatId(chatId);
-        sendMessageRequest.setText("Selecciona una categoría para: " + qbittorrent.getName());
+        sendMessageRequest.setText("Selecciona una categoría para: " + escapeTextForTelegram(qbittorrent.getName()));
         // sendMessageRequest.setText(abbreviate(text, 3000));
         sendMessageRequest.setParseMode(ParseMode.MARKDOWNV2);
         sendMessageRequest.setReplyMarkup(getKeyboardRemove());
@@ -305,6 +305,17 @@ public class ClassifyService {
             createSendMessageAndSendToRabbit("Reset status", classifyConversation.getChatId(), false);
         }
         processNotProcessing();
+    }
+
+    private String escapeTextForTelegram(String text) {
+        String[] specialChars = new String[] {
+                "_", "*", "[", "]", "(", ")", "~", "`", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!"
+        };
+        for (String ch : specialChars) {
+            text = text.replace(ch, "\\" + ch);
+        }
+
+        return text;
     }
 
 }
