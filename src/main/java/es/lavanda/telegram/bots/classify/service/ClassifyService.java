@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -233,7 +234,7 @@ public class ClassifyService {
         // sendMessageRequest.setText(abbreviate(text, 3000));
         sendMessageRequest.setReplyMarkup(getKeyboardRemove());
         // sendMessageRequest.setSaveOnDatabase(saveOnDatabase);
-        // sendMessageRequest.setType(MessageType.TEXT);
+        // sendMessageRequest.set(MessageType.TEXT);
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         keyboardMarkup.setOneTimeKeyboard(true);
         List<KeyboardRow> keyboard = new ArrayList<>();
@@ -250,7 +251,7 @@ public class ClassifyService {
     private void sendMessageTelegramMessage(TelegramMessage message) {
         if (StringUtils.hasText(message.getText())) {
             SendMessage toSend = messageMapper.messageToSendMessage(message);
-
+            toSend.setParseMode(ParseMode.MARKDOWNV2);
             if (Boolean.TRUE.equals(message.isSaveOnDatabase())) {
                 ClassifyConversation telegramConversation = classifyConversationRepository
                         .findByChatId(message.getChatId())
@@ -268,6 +269,8 @@ public class ClassifyService {
 
     private void sendPhotoTelegramMessage(TelegramMessage message) {
         SendPhoto toSend = messageMapper.messageToSendPhoto(message);
+        toSend.setParseMode(ParseMode.MARKDOWNV2);
+
         if (Boolean.TRUE.equals(message.isSaveOnDatabase())) {
             ClassifyConversation telegramConversation = classifyConversationRepository
                     .findByChatId(message.getChatId())
@@ -284,6 +287,7 @@ public class ClassifyService {
 
     private void sendEditMessageTelegramMessage(TelegramMessage message) {
         EditMessageText toSend = messageMapper.messageToEditMessage(message);
+        toSend.setParseMode(ParseMode.MARKDOWNV2);
         classifyHandler.sendEditMessage(toSend);
     }
 
