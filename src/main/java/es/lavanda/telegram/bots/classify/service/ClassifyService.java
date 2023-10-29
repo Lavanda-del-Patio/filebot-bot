@@ -110,6 +110,7 @@ public class ClassifyService {
         sendMessageRequest.setChatId(chatId);
         sendMessageRequest.setText("Selecciona una categoría para: " + qbittorrent.getName());
         // sendMessageRequest.setText(abbreviate(text, 3000));
+        sendMessageRequest.setParseMode(ParseMode.MARKDOWNV2);
         sendMessageRequest.setReplyMarkup(getKeyboardRemove());
         // sendMessageRequest.setSaveOnDatabase(saveOnDatabase);
         // sendMessageRequest.setType(MessageType.TEXT);
