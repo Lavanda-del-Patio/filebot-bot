@@ -84,14 +84,18 @@ public class ClassifyService {
                 .findAllByStatus(ClassifyConversationStatus.IDLE.toString());
         List<Qbittorrent> qbittorrents = qbitorrentRepository.findAll();
         if (qbittorrents.size() > 0) {
+            log.info("qBittorrents size: {}", qbittorrents.size());
+            log.info("ClassifyConversations size: {}", classifyConversations.size());
+            Qbittorrent qbittorrent = qbittorrents.get(0);
             for (ClassifyConversation classifyConversation : classifyConversations) {
+                log.info("Nombre de la conversación: {}", classifyConversation.getName());
                 String messageId = null;
-                messageId = sendMessageToSelectCategory(qbittorrents.get(0), classifyConversation.getChatId());
+                messageId = sendMessageToSelectCategory(qbittorrent, classifyConversation.getChatId());
                 // messageId = sendMessageWithPossibilities(telegramFilebotExecution,
                 // classifyConversation.getChatId());
                 classifyConversation.setStatus(ClassifyConversationStatus.WAITING_USER_RESPONSE_CATEGORY);
                 classifyConversation.setInlineKeyboardMessageId(messageId);
-                classifyConversation.setQbittorrentId(qbittorrents.get(0).getId());
+                classifyConversation.setQbittorrentId(qbittorrent.getId());
                 log.info("Saving telegram conversation with status {} and messageId {}",
                         ClassifyConversationStatus.WAITING_USER_RESPONSE_CATEGORY,
                         messageId);
