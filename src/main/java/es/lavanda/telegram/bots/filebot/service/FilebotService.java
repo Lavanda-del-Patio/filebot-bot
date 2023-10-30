@@ -72,7 +72,7 @@ public class FilebotService {
     @Autowired
     private ProducerService producerService;
 
-    private Set<Elected> electeds = new HashSet<>(3);
+    // private Set<Elected> electeds = new HashSet<>(3);
 
     public void run(FilebotExecutionIDTO filebotExecutionIDTO) {
         FilebotExecution filebotExecution = convertToModel(filebotExecutionIDTO);
@@ -121,7 +121,7 @@ public class FilebotService {
                 });
     }
 
-    public void processNotProcessing(FilebotExecution telegramFilebotExecution) {
+    public void processNotProcessing(FilebotExecution filebotExecution) {
         log.info("processNotProcessing whith model method...");
         if (Boolean.FALSE.equals(filebotExecutionRepository
                 .findByStatusStartsWith("PROCESSING").isPresent())) {
@@ -129,16 +129,16 @@ public class FilebotService {
                     .findAllByStatus(FilebotConversationStatus.IDLE.toString());
             for (FilebotConversation telegramConversation : telegramConversations) {
                 String messageId = null;
-                if (telegramFilebotExecution.getPossibilities().isEmpty()) {
-                    messageId = sendMessageToSelectLabel(telegramFilebotExecution,
+                if (filebotExecution.getPossibilities().isEmpty()) {
+                    messageId = sendMessageToSelectLabel(filebotExecution,
                             telegramConversation.getChatId());
-                    telegramFilebotExecution.setStatus(FilebotNameStatus.PROCESSING_LABEL);
+                    filebotExecution.setStatus(FilebotNameStatus.PROCESSING_LABEL);
                 } else {
-                    messageId = sendMessageWithPossibilities(telegramFilebotExecution,
+                    messageId = sendMessageWithPossibilities(filebotExecution,
                             telegramConversation.getChatId());
-                    telegramFilebotExecution.setStatus(FilebotNameStatus.PROCESSING_WITH_POSSIBILITIES);
+                    filebotExecution.setStatus(FilebotNameStatus.PROCESSING_WITH_POSSIBILITIES);
                 }
-                filebotExecutionRepository.save(telegramFilebotExecution);
+                filebotExecutionRepository.save(filebotExecution);
                 telegramConversation.setStatus(FilebotConversationStatus.WAITING_USER_RESPONSE);
                 telegramConversation.setInlineKeyboardMessageId(messageId);
                 log.info("Saving telegram conversation with status {} and messageId {}", "WAITING_USER_RESPONSE",
@@ -185,45 +185,46 @@ public class FilebotService {
                         "La carpeta es: \n*%s*\nLos ficheros son:\n*%s*Selecciona el tipo de contenido o algun anterior:",
                         filebotNameSelection.getPath(), abbreviate(sb.toString(), 400)));
         sendMessageRequest.setReplyMarkup(
-                getInlineKeyboard(List.of("Serie", "Pelicula"), List.of("TV", "MOVIE"), getElectedName(),
-                        getElectedTmdbId()));
+                getInlineKeyboard(List.of("Serie", "Pelicula"), List.of("TV", "MOVIE")));
+                // , getElectedName(),
+                //         getElectedTmdbId()));
         return filebotHandler.sendMessage(sendMessageRequest);
     }
 
-    private Elected getElected(int tmdbId) {
-        return electeds.stream().filter(e -> e.getTmdbId() == tmdbId).findFirst().orElse(null);
-    }
+    // private Elected getElected(int tmdbId) {
+    //     return electeds.stream().filter(e -> e.getTmdbId() == tmdbId).findFirst().orElse(null);
+    // }
 
-    private List<String> getElectedName() {
-        return electeds.stream().map(Elected::getName).collect(Collectors.toList());
-    }
+    // private List<String> getElectedName() {
+    //     return electeds.stream().map(Elected::getName).collect(Collectors.toList());
+    // }
 
-    private List<String> getElectedTmdbId() {
-        return electeds.stream().map(e -> String.valueOf(e.getTmdbId())).collect(Collectors.toList());
-    }
+    // private List<String> getElectedTmdbId() {
+    //     return electeds.stream().map(e -> String.valueOf(e.getTmdbId())).collect(Collectors.toList());
+    // }
 
-    private void addNewElected(String name, int tmdbId, String releaseDate) {
-        boolean found = false;
-        for (Elected elected : electeds) {
-            if (elected.getName().equals(name) && elected.getTmdbId() == tmdbId) {
-                // Increment the number of times this candidate has been elected
-                elected.setTimes(elected.getTimes() + 1);
-                found = true;
-            } else {
-                // Decrement the number of times the other candidates have been elected
-                elected.setTimes(elected.getTimes() - 1);
-                if (elected.getTimes() == 0) {
-                    // If the number of times for this candidate has reached 0, remove it from the
-                    // list
-                    electeds.remove(elected);
-                }
-            }
-        }
-        if (!found) {
-            // If the elected candidate is not in the list, add them with a times value of 1
-            electeds.add(new Elected(1, name, releaseDate, tmdbId));
-        }
-    }
+    // private void addNewElected(String name, int tmdbId, String releaseDate) {
+    //     boolean found = false;
+    //     for (Elected elected : electeds) {
+    //         if (elected.getName().equals(name) && elected.getTmdbId() == tmdbId) {
+    //             // Increment the number of times this candidate has been elected
+    //             elected.setTimes(elected.getTimes() + 1);
+    //             found = true;
+    //         } else {
+    //             // Decrement the number of times the other candidates have been elected
+    //             elected.setTimes(elected.getTimes() - 1);
+    //             if (elected.getTimes() == 0) {
+    //                 // If the number of times for this candidate has reached 0, remove it from the
+    //                 // list
+    //                 electeds.remove(elected);
+    //             }
+    //         }
+    //     }
+    //     if (!found) {
+    //         // If the elected candidate is not in the list, add them with a times value of 1
+    //         electeds.add(new Elected(1, name, releaseDate, tmdbId));
+    //     }
+    // }
 
     private String sendMessageToForceStrict(String chatId) {
         SendMessage sendMessageRequest = new SendMessage();
@@ -497,7 +498,7 @@ public class FilebotService {
                     telegramFilebotExecution.getPath());
             telegramConversation.setStatus(
                     FilebotConversationStatus.IDLE);
-            addNewElected(name, Integer.parseInt(response), releaseDate);
+            // addNewElected(name, Integer.parseInt(response), releaseDate);
             telegramConversation.setOtherMessageIds(new ArrayList<>());
             filebotConversationRepository.save(telegramConversation);
             processNotProcessing();
@@ -538,30 +539,30 @@ public class FilebotService {
         FilebotConversation telegramConversation = filebotConversationRepository.findByChatId(chatId).get();
 
         try {
-            int tmdbId = Integer.parseInt(response);
+            // int tmdbId = Integer.parseInt(response);
             telegramFilebotExecution.setQuery(response);
             telegramFilebotExecution.setStatus(FilebotNameStatus.PROCESSED);
             filebotExecutionRepository.save(telegramFilebotExecution);
             producerService.sendFilebotExecution(
                     getFilebotExecutionODTO(telegramFilebotExecution));
-            Elected elected = getElected(tmdbId);
-            createEditMessageAndSendToRabbit(chatId, messageId,
-                    String.format("Seleccionado de nuevo: %s",
-                            elected.getName()
-                                    + " ("
-                                    + elected.getReleaseDate()
-                                    + ")"));
+            // Elected elected = getElected(tmdbId);
+            // createEditMessageAndSendToRabbit(chatId, messageId,
+            //         String.format("Seleccionado de nuevo: %s",
+            //                 elected.getName()
+            //                         + " ("
+            //                         + elected.getReleaseDate()
+            //                         + ")"));
             for (String messageToDelete : telegramConversation.getOtherMessageIds()) {
                 createDeleteMessageAndSendToRabbit(chatId, messageToDelete);
             }
-            // createSendMessageAndSendToRabbit("Procesado correctamente", chatId, false);
+            createSendMessageAndSendToRabbit("Procesado correctamente", chatId, false);
             log.info("Processed telegramFilebotExecutionId: " +
                     telegramFilebotExecution.getPath());
             telegramConversation.setStatus(
                     FilebotConversationStatus.IDLE);
             telegramConversation.setOtherMessageIds(new ArrayList<>());
             filebotConversationRepository.save(telegramConversation);
-            addNewElected(null, tmdbId, null);
+            // addNewElected(null, tmdbId, null);
             processNotProcessing();
 
         } catch (NumberFormatException e) {
