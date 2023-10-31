@@ -116,6 +116,7 @@ public class ClassifyService {
         // sendMessageRequest.setType(MessageType.TEXT);
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         keyboardMarkup.setOneTimeKeyboard(true);
+        keyboardMarkup.setResizeKeyboard(true);
         List<KeyboardRow> keyboard = new ArrayList<>();
         KeyboardRow row = new KeyboardRow();
         for (FilebotCategory category : FilebotCategory.values()) {
@@ -238,6 +239,7 @@ public class ClassifyService {
         // sendMessageRequest.set(MessageType.TEXT);
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
         keyboardMarkup.setOneTimeKeyboard(true);
+        keyboardMarkup.setResizeKeyboard(true);
         List<KeyboardRow> keyboard = new ArrayList<>();
         KeyboardRow row = new KeyboardRow();
         for (FilebotAction action : FilebotAction.values()) {
