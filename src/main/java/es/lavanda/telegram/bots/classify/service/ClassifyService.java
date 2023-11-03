@@ -199,22 +199,30 @@ public class ClassifyService {
         List<ClassifyConversation> classifyConversations = classifyConversationRepository.findAllByStatusIn(
                 List.of(ClassifyConversationStatus.WAITING_USER_RESPONSE_CATEGORY.toString(),
                         ClassifyConversationStatus.WAITING_USER_RESPONSE_ACTION.toString()));
-        for (ClassifyConversation classifyConversation : classifyConversations) {
+        // for (ClassifyConversation classifyConversation : classifyConversations) {
+        if (classifyConversations.size() == 0) {
+            log.error("No hay conversaciones en proceso");
+            return;
+        } else {
+            ClassifyConversation classifyConversation = classifyConversations.get(0);
             if (classifyConversation.getStatus().equals(ClassifyConversationStatus.WAITING_USER_RESPONSE_CATEGORY)) {
                 Qbittorrent qbittorrent = qbitorrentRepository.findById(classifyConversation.getQbittorrentId())
                         .orElseThrow(() -> new ClassifyException("Qbittorrent deleted already"));
                 qbittorrent.setCategory(FilebotCategory.valueOf(response));
                 qbitorrentRepository.save(qbittorrent);
+                // A SELECCIONAR ACCION
+                for (ClassifyConversation classifyConversationToAction : classifyConversations) {
+                    classifyConversationToAction.setStatus(ClassifyConversationStatus.IDLE);
+                    classifyConversationRepository.save(classifyConversationToAction);
+                    String messageId = sendMessageToSelectAction(classifyConversationToAction.getChatId());
+                    classifyConversationToAction.setStatus(ClassifyConversationStatus.WAITING_USER_RESPONSE_ACTION);
+                    classifyConversationToAction.setInlineKeyboardMessageId(messageId);
+                    log.info("Saving telegram conversation with status {} and messageId {}",
+                            ClassifyConversationStatus.WAITING_USER_RESPONSE_ACTION,
+                            messageId);
+                    classifyConversationRepository.save(classifyConversationToAction);
+                }
 
-                String messageId = sendMessageToSelectAction(classifyConversation.getChatId());
-                // messageId = sendMessageWithPossibilities(telegramFilebotExecution,
-                // classifyConversation.getChatId());
-                classifyConversation.setStatus(ClassifyConversationStatus.WAITING_USER_RESPONSE_ACTION);
-                classifyConversation.setInlineKeyboardMessageId(messageId);
-                log.info("Saving telegram conversation with status {} and messageId {}",
-                        ClassifyConversationStatus.WAITING_USER_RESPONSE_ACTION,
-                        messageId);
-                classifyConversationRepository.save(classifyConversation);
             } else {
                 Qbittorrent qbittorrent = qbitorrentRepository.findById(classifyConversation.getQbittorrentId())
                         .orElseThrow(() -> new ClassifyException("Qbittorrent deleted already"));
@@ -222,11 +230,14 @@ public class ClassifyService {
                 producerService
                         .sendToFilebotExecutorResolution(messageMapper.qbittorrentToQbittorrentModel(qbittorrent));
                 qbitorrentRepository.delete(qbittorrent);
-                classifyConversation.setStatus(ClassifyConversationStatus.IDLE);
-                classifyConversationRepository.save(classifyConversation);
+                for (ClassifyConversation classifyConversationToAction : classifyConversations) {
+                    classifyConversationToAction.setStatus(ClassifyConversationStatus.IDLE);
+                    classifyConversationRepository.save(classifyConversationToAction);
+                }
                 processNotProcessing();
             }
         }
+        // }
     }
 
     private String sendMessageToSelectAction(String chatId) {
