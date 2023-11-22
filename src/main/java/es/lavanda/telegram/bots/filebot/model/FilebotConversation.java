@@ -21,14 +21,18 @@ public class FilebotConversation {
 
     private String chatId;
 
-    private String inlineKeyboardMessageId;
+    private FilebotConversationStatus conversationStatus;
 
-    private List<String> otherMessageIds = new ArrayList<>();
+    private String previousMessageId;
 
-    private FilebotConversationStatus status;
+    private List<String> inlineKeyboardMessageIds = new ArrayList<>();
+
+    private List<String> photosMessageIds = new ArrayList<>();
+
+    private List<String> callbackData = new ArrayList<>();
 
     public enum FilebotConversationStatus {
-        IDLE, WAITING_USER_RESPONSE, WAITING_TMDB_RESPONSE, STOPPED;
-
+        IDLE, IN_PROGRESS, STOPPED;
     }
+
 }

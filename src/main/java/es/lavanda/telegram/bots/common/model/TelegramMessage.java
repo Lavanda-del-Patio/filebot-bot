@@ -1,36 +1,52 @@
 package es.lavanda.telegram.bots.common.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
+import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethodMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
+import es.lavanda.telegram.bots.common.service.chainofresponsability.Handler;
 import lombok.Data;
 
 @Data
 public class TelegramMessage implements Serializable {
 
-    private String chatId;
+    private String idFilebotConversation;
 
-    private int messageId;
-
-    private String text;
-
-    private boolean saveOnDatabase;
-
-    private String callbackId;
+    private MessageHandler handler;
 
     private MessageType type;
 
-    private String caption;
+    private List<String> callbackData = new ArrayList<>();
 
-    private InputFile photo;
+    private boolean cleanPrevious;
 
-    private ReplyKeyboard replyMarkup;
+    private String photoUrl;
 
-    private Handler handler;
+    // MessageOfTelegram
 
-    public enum Handler {
+    private String chatId;
+
+    private String messageId;
+
+    private String text;
+
+    private InlineKeyboardMarkup inlineKeyboardMarkup;
+
+    private ReplyKeyboard replyKeyboard;
+
+    // FINISH MessageOfTelegram
+
+    public enum MessageHandler {
         FILEBOT, CLASSIFY
     }
 
