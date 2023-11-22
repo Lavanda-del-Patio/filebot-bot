@@ -1,8 +1,18 @@
 package es.lavanda.telegram.bots.common.config;
 
+import java.util.HashMap;
+import java.util.Map;
 
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
+import org.springframework.amqp.support.converter.DefaultClassMapper;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -11,8 +21,6 @@ import org.telegram.telegrambots.meta.generics.BotSession;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import es.lavanda.telegram.bots.classify.config.ClassifyConfig;
-import es.lavanda.telegram.bots.classify.handler.ClassifyHandler;
-import es.lavanda.telegram.bots.classify.service.ClassifyService;
 import es.lavanda.telegram.bots.filebot.config.FilebotConfig;
 import es.lavanda.telegram.bots.filebot.handler.FilebotHandler;
 import es.lavanda.telegram.bots.filebot.service.FilebotService;
@@ -26,8 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 @EnableScheduling
 public class AppBeans {
 
-    @Autowired
-    private ClassifyService classifyService;
+    // @Autowired
+    // private ClassifyService classifyService;
 
     @Autowired
     private FilebotService filebotService;
@@ -46,16 +54,16 @@ public class AppBeans {
     public void start() throws TelegramApiException {
         log.info("Instantiate Telegram Bots API...");
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
-        addClassifyHandler(botsApi);
+        // addClassifyHandler(botsApi);
         addFilebotHandler(botsApi);
     }
 
     // @PreDestroy
     // public void preDestroy() {
-    //     log.info("PreDestroy BOT");
-    //     botSession.stop();
-    //     botSessionFilebotExecutor.stop();
-    //     log.info("Destroyed");
+    // log.info("PreDestroy BOT");
+    // botSession.stop();
+    // botSessionFilebotExecutor.stop();
+    // log.info("Destroyed");
     // }
 
     private void addFilebotHandler(TelegramBotsApi botsApi) throws TelegramApiException {
@@ -65,12 +73,13 @@ public class AppBeans {
         botSession = botsApi.registerBot(filebotHandler);
     }
 
-    private void addClassifyHandler(TelegramBotsApi botsApi) throws TelegramApiException {
-        ClassifyHandler classifyHandler = new ClassifyHandler(
-                classifyService, classifyConfig);
-        classifyService.setClassifyHandler(classifyHandler);
-        botSession = botsApi.registerBot(
-                classifyHandler);
-    }
+    // private void addClassifyHandler(TelegramBotsApi botsApi) throws
+    // TelegramApiException {
+    // ClassifyHandler classifyHandler = new ClassifyHandler(
+    // classifyService, classifyConfig);
+    // classifyService.setClassifyHandler(classifyHandler);
+    // botSession = botsApi.registerBot(
+    // classifyHandler);
+    // }
 
 }
