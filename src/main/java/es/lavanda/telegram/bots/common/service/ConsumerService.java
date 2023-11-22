@@ -8,7 +8,6 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
-import es.lavanda.lib.common.model.FilebotTelegramDeleteFolder;
 import es.lavanda.lib.common.model.TelegramFilebotExecutionODTO;
 import es.lavanda.telegram.bots.common.model.TelegramMessage;
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution;
