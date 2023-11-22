@@ -1,10 +1,11 @@
 package es.lavanda.telegram.bots.common.service;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import es.lavanda.lib.common.model.FilebotExecutionODTO;
-import es.lavanda.lib.common.model.QbittorrentModel;
 import es.lavanda.lib.common.model.TelegramFilebotExecutionIDTO;
 import es.lavanda.telegram.bots.classify.exception.ClassifyException;
 import es.lavanda.telegram.bots.common.model.TelegramMessage;
@@ -17,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ProducerService {
 
+    @Autowired
+    @Qualifier("rabbitTemplateOverrided")
     private final RabbitTemplate rabbitTemplate;
 
     public void sendFilebotExecution(FilebotExecutionODTO filebot) {
@@ -52,15 +55,4 @@ public class ProducerService {
         }
     }
 
-    public void sendToFilebotExecutorResolution(QbittorrentModel qbittorrentModel) {
-        try {
-            log.info("Sending message to queue {} with the data {}", "filebot-new-execution-resolution",
-                    qbittorrentModel);
-            rabbitTemplate.convertAndSend("filebot-new-execution-resolution", qbittorrentModel);
-            log.info("Sended message to queue");
-        } catch (Exception e) {
-            log.error("Failed send message to queue {}", "filebot-new-execution-resolution", e);
-            throw new ClassifyException("Failed send message to queue", e);
-        }
-    }
 }

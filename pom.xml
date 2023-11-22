@@ -20,7 +20,7 @@
 		<java.version>21</java.version>
 		<maven.compiler.target>21</maven.compiler.target>
 		<project.scm.id>github</project.scm.id>
-		<org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
+		<org.modelmapper.version>3.2.0</org.modelmapper.version>
 		<lombok.version>1.18.30</lombok.version>
 	</properties>
 
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>es.lavanda</groupId>
 			<artifactId>lib-common</artifactId>
-			<version>0.0.65</version>
+			<version>0.0.69</version>
 		</dependency>
 		<!-- ============================== SPRINGBOOT ============================ -->
 		<dependency>
@@ -46,7 +46,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
-		</dependency>		
+		</dependency>
 		<!-- ================================ TELEGAM BOTS =============================== -->
 		<dependency>
 			<groupId>org.telegram</groupId>
@@ -71,11 +71,21 @@
 			<artifactId>okhttp</artifactId>
 			<version>4.11.0</version>
 		</dependency>
-		<!-- ============================= MAP STRUCT ================================= -->
+		<!-- ============================= MODEL MAPPER ================================= -->
 		<dependency>
-			<groupId>org.mapstruct</groupId>
-			<artifactId>mapstruct</artifactId>
-			<version>${org.mapstruct.version}</version>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>${org.modelmapper.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.h2database</groupId>
+					<artifactId>h2</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.testng</groupId>
+					<artifactId>testng</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 	<build>
@@ -96,11 +106,6 @@
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 							<version>${lombok.version}</version>
-						</path>
-						<path>
-							<groupId>org.mapstruct</groupId>
-							<artifactId>mapstruct-processor</artifactId>
-							<version>${org.mapstruct.version}</version>
 						</path>
 					</annotationProcessorPaths>
 					<compilerArgs>
@@ -147,7 +152,7 @@
 						<environment>
 							<TZ>Europe/Madrid</TZ>
 						</environment>
-						<user>1000:1000</user>
+						<user>568:568</user>
 					</container>
 				</configuration>
 			</plugin>

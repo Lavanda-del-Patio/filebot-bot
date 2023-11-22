@@ -12,15 +12,17 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import es.lavanda.lib.common.model.filebot.FilebotAction;
+import es.lavanda.lib.common.model.filebot.FilebotCategory;
 import es.lavanda.lib.common.model.tmdb.search.TMDBResultDTO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 @Data
-@Document("telegram_filebot_execution")
 @ToString
 @EqualsAndHashCode(exclude = { "id", "createdAt", "lastModifiedAt" })
+@Document("filebot_conversation_execution")
 public class FilebotExecution implements Serializable {
     @Id
     private String id;
@@ -31,15 +33,19 @@ public class FilebotExecution implements Serializable {
 
     private List<String> possibilities;
 
-    private FilebotNameStatus status;
+    private FilebotExecutionStatus status = FilebotExecutionStatus.UNPROCESSED;
 
-    private String label;
+    private FilebotCategory category;
+
+    private FilebotAction action;
 
     private boolean forceStrict;
 
     private String query;
 
-    private String selectedPossibilitie;
+    private String selectedPossibilities;
+
+    private boolean inProgress;
 
     private Map<String, TMDBResultDTO> possibleChoicesTMDB = new HashMap<>();
 
@@ -51,9 +57,12 @@ public class FilebotExecution implements Serializable {
     @Field("last_modified_at")
     private Date lastModifiedAt;
 
-    public enum FilebotNameStatus {
-        UNPROCESSING, PROCESSING_LABEL, PROCESSING_FORCE_STRICT, PROCESSING_TMDB_RESPONSE, PROCESSING_QUERY,
-        PROCESSING_WITH_POSSIBILITIES, PROCESSED
-
+    public enum FilebotExecutionStatus {
+        UNPROCESSED, CATEGORY, FORCE_STRICT, ACTION, TMDB, CHOICE, PROCESSED;
     }
+
+    public FilebotExecutionStatus getPreviousStatus() {
+        return FilebotExecutionStatus.values()[status.ordinal() - 1];
+    }
+
 }

@@ -9,10 +9,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
 import es.lavanda.lib.common.model.FilebotTelegramDeleteFolder;
-import es.lavanda.lib.common.model.QbittorrentModel;
 import es.lavanda.lib.common.model.TelegramFilebotExecutionODTO;
-import es.lavanda.telegram.bots.classify.handler.ClassifyHandler;
-import es.lavanda.telegram.bots.classify.service.ClassifyService;
 import es.lavanda.telegram.bots.common.model.TelegramMessage;
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution;
 import es.lavanda.telegram.bots.filebot.service.FilebotService;
@@ -23,8 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class ConsumerService {
-
-    private final ClassifyService classifyService;
 
     private final FilebotService filebotService;
 
@@ -38,28 +33,27 @@ public class ConsumerService {
     }
 
     @RabbitListener(queues = "telegram-query-tmdb-resolution")
-    public void consumeMessageFeedFilms(TelegramFilebotExecutionODTO telegramFilebotExecutionODTO) {
+    public void consumeMessageFeedFilms(TelegramFilebotExecutionODTO telegramFilebotExecutionODTO)
+            throws InterruptedException {
         log.info("Reading message of the queue telegram-query-tmdb-resolution: {}", telegramFilebotExecutionODTO);
+        // log.info("Sleeping on this queue");
+        // Thread.sleep(2000);
+        // log.info("Finish sleeping on this queue");
         filebotService.recieveTMDBData(telegramFilebotExecutionODTO);
         log.info("Finish message of the queue telegram-query-tmdb-resolution");
     }
 
     // ***** CLASSIFY SERVICE */
-
-    @RabbitListener(queues = "filebot-new-execution")
-    public void consumeMessageForDeleteFolder(QbittorrentModel qbittorrentModel) {
-        log.info("Reading message of the queue filebot-new-execution {}", qbittorrentModel);
-        classifyService.newExecution(qbittorrentModel);
-        log.info("Finish message of the queue filebot-new-execution");
-    }
+    // FIN
+    // ***** */
 
     @RabbitListener(queues = "telegram-messages")
     public void consumeMessageForSendMessages(TelegramMessage telegramMessage) {
-        log.info("Reading message of the queue filebot-telegram-messages: {}", telegramMessage);
+        log.info("Reading message of the queue telegram-messages: {}", telegramMessage);
         switch (telegramMessage.getHandler()) {
-            case CLASSIFY:
-                classifyService.sendMessage(telegramMessage);
-                break;
+            // case CLASSIFY:
+            // classifyService.sendMessage(telegramMessage);
+            // break;
             case FILEBOT:
                 filebotService.sendMessage(telegramMessage);
                 break;

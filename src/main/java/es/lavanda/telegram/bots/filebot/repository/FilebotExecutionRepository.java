@@ -1,17 +1,20 @@
 package es.lavanda.telegram.bots.filebot.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution;
+import es.lavanda.telegram.bots.filebot.model.FilebotExecution.FilebotExecutionStatus;
 
 @Repository
 public interface FilebotExecutionRepository extends MongoRepository<FilebotExecution, String> {
 
-    Optional<FilebotExecution> findByStatusStartsWith(String status);
+    FilebotExecution findFirstByStatus(FilebotExecutionStatus unprocessed);
 
-    List<FilebotExecution> findAllByStatus(String Status);
+    List<FilebotExecution> findAllByStatusNot(FilebotExecutionStatus processed);
+
+    FilebotExecution findByStatusNotIn(List<FilebotExecutionStatus> filebotExecutionStatus);
+
 }
