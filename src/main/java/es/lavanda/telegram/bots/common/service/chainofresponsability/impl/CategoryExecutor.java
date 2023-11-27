@@ -44,7 +44,7 @@ public class CategoryExecutor implements Handler {
                 filebotExecution = assignCategory(filebotExecution, callbackResponse);
                 callbackResponse = null;
                 filebotExecution = updateStatus(filebotExecution);
-                sendEditMessageReplyMarkup(filebotConversation, filebotExecution.getCategory());
+                sendEditMessageReplyMarkup(filebotConversation, filebotExecution);
             } else {
                 sendMessageToSelectLabel(filebotExecution,
                         filebotConversation.getChatId());
@@ -60,7 +60,8 @@ public class CategoryExecutor implements Handler {
         return filebotExecutionService.save(filebotExecution);
     }
 
-    private void sendEditMessageReplyMarkup(FilebotConversation filebotConversation, FilebotCategory category) {
+    private void sendEditMessageReplyMarkup(FilebotConversation filebotConversation,
+            FilebotExecution filebotExecution) {
         TelegramMessage telegramMessage = new TelegramMessage();
         telegramMessage.setChatId(filebotConversation.getChatId());
         telegramMessage
@@ -70,8 +71,8 @@ public class CategoryExecutor implements Handler {
         telegramMessage.setHandler(MessageHandler.FILEBOT);
         telegramMessage.setType(MessageType.EDIT_MESSAGE);
         telegramMessage.setMessageId(filebotConversation.getPreviousMessageId());
-        telegramMessage.setText(String.format("Categoria Seleccionada: *%s*",
-                category.getValue()));
+        telegramMessage.setText(String.format("Categoria Seleccionada *%s* para la carpeta %s",
+                filebotExecution.getCategory().getValue(), filebotExecution.getName()));
         producerService.sendTelegramMessage(telegramMessage);
     }
 
@@ -100,7 +101,7 @@ public class CategoryExecutor implements Handler {
         telegramMessage
                 .setText(String.format(
                         "La carpeta es *%s*.\nLos ficheros son:\n*%s*Selecciona el tipo de contenido:",
-                        filebotExecution.getPath(), TelegramUtils.abbreviate(sb.toString(), 400)));
+                        filebotExecution.getName(), TelegramUtils.abbreviate(sb.toString(), 400)));
         telegramMessage
                 .setInlineKeyboardMarkup(
                         TelegramUtils.getInlineKeyboard(FilebotCategory.getAllValues(), false));
