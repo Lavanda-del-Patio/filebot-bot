@@ -4,7 +4,7 @@
 
 	<groupId>es.lavanda</groupId>
 	<artifactId>filebot-bot</artifactId>
-	<version>0.0.39</version>
+	<version>0.0.40-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>lavanda-filebot-bot</name>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>es.lavanda</groupId>
 			<artifactId>lib-common</artifactId>
-			<version>0.0.69</version>
+			<version>0.0.70</version>
 		</dependency>
 		<!-- ============================== SPRINGBOOT ============================ -->
 		<dependency>

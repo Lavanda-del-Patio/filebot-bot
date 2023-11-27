@@ -45,7 +45,8 @@ public class ChoiceExecutor implements Handler {
                     filebotExecution.setQuery(null);
                     sendEditMessageReplyMarkup(filebotConversation, "No se ha seleccionado ninguna opción");
                     cleanOldMessages(filebotConversation);
-                    sendMessage("Procesado correctamente", filebotConversation.getChatId());
+                    sendMessage(String.format("Procesado correctamente %s", filebotExecution.getName()),
+                            filebotConversation.getChatId());
                     log.info("Processed telegramFilebotExecutionId: "
                             + filebotExecution.getPath());
                     filebotExecution = updateStatus(filebotExecution);
@@ -64,15 +65,7 @@ public class ChoiceExecutor implements Handler {
                 } else {
                     filebotExecution.setQuery(callbackResponse);
                     filebotExecution = updateStatus(filebotExecution);
-                    sendEditMessageReplyMarkup(filebotConversation, String.format("Seleccionado: %s",
-                            filebotExecution.getPossibleChoicesTMDB()
-                                    .get(callbackResponse).getTitle() +
-                                    " ("
-                                    +
-                                    filebotExecution.getPossibleChoicesTMDB()
-                                            .get(callbackResponse)
-                                            .getReleaseDate()
-                                    + ")"));
+                    sendEditMessageReplyMarkup(filebotConversation, getEditMessageReply(filebotExecution));
                     sendMessage("Procesado correctamente", filebotConversation.getChatId());
                     cleanOldMessages(filebotConversation);
                     log.info("Processed telegramFilebotExecutionId: "
@@ -88,6 +81,33 @@ public class ChoiceExecutor implements Handler {
         } else if (next != null) {
             next.handleRequest(filebotConversation, filebotExecution, callbackResponse);
         }
+    }
+
+    private String getEditMessageReply(FilebotExecution filebotExecution) {
+        if (FilebotCategory.FILM.equals(filebotExecution.getCategory())) {
+            return String.format("Seleccionado: %s",
+                    filebotExecution.getPossibleChoicesTMDB()
+                            .get(filebotExecution.getSelectedPossibilities())
+                            .getTitle() +
+                            " ("
+                            +
+                            filebotExecution.getPossibleChoicesTMDB()
+                                    .get(filebotExecution.getSelectedPossibilities())
+                                    .getReleaseDate()
+                            + ")");
+        } else {
+            return String.format("Seleccionado: %s",
+                    filebotExecution.getPossibleChoicesTMDB()
+                            .get(filebotExecution.getSelectedPossibilities())
+                            .getName() +
+                            " ("
+                            +
+                            filebotExecution.getPossibleChoicesTMDB()
+                                    .get(filebotExecution.getSelectedPossibilities())
+                                    .getFirstAirDate()
+                            + ")");
+        }
+
     }
 
     private void sendMessage(String overview, String chatId) {
