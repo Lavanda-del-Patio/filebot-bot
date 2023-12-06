@@ -16,6 +16,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
 import es.lavanda.lib.common.model.FilebotExecutionODTO;
+import es.lavanda.lib.common.model.FilebotExecutionTestIDTO;
+import es.lavanda.lib.common.model.FilebotExecutionTestODTO;
 import es.lavanda.lib.common.model.TelegramFilebotExecutionODTO;
 import es.lavanda.telegram.bots.common.model.TelegramMessage;
 import es.lavanda.telegram.bots.common.model.TelegramMessage.MessageHandler;
@@ -26,6 +28,7 @@ import es.lavanda.telegram.bots.common.service.chainofresponsability.impl.Catego
 import es.lavanda.telegram.bots.common.service.chainofresponsability.impl.ChoiceExecutor;
 import es.lavanda.telegram.bots.common.service.chainofresponsability.impl.ForceStrictExecutor;
 import es.lavanda.telegram.bots.common.service.chainofresponsability.impl.TMDBExecutor;
+import es.lavanda.telegram.bots.common.service.chainofresponsability.impl.TestExecutor;
 import es.lavanda.telegram.bots.filebot.handler.FilebotHandler;
 import es.lavanda.telegram.bots.filebot.model.FilebotConversation;
 import es.lavanda.telegram.bots.filebot.model.FilebotConversation.FilebotConversationStatus;
@@ -60,17 +63,31 @@ public class FilebotService {
 
     private final TMDBExecutor tmdbExecutor;
 
+    private final TestExecutor testExecutor;
+
     @PostConstruct
     public void postConstruct() {
         categoryExecutor.setNext(forceStrictExecutor);
         forceStrictExecutor.setNext(actionExecutor);
         actionExecutor.setNext(tmdbExecutor);
         tmdbExecutor.setNext(choiceExecutor);
+        choiceExecutor.setNext(testExecutor);
     }
 
     public void run(FilebotExecutionIDTO filebotExecutionIDTO) {
         FilebotExecution filebotExecution = convertToModel(filebotExecutionIDTO);
         filebotExecutionService.save(filebotExecution);
+        log.info("Saved");
+    }
+
+    public void runTest(FilebotExecutionTestIDTO filebotExecutionTestIDTO) {
+        FilebotExecution oldFilebotExecution = filebotExecutionService.findById(filebotExecutionTestIDTO.getId());
+        FilebotExecution filebotExecutionNew = convertToModel(filebotExecutionTestIDTO);
+        oldFilebotExecution.setFiles(filebotExecutionNew.getFiles());
+        oldFilebotExecution.setPossibilities(filebotExecutionNew.getPossibilities());
+        oldFilebotExecution.setStatus(FilebotExecutionStatus.TEST);
+        filebotExecutionService.save(oldFilebotExecution);
+        processNotProcessing();
         log.info("Saved");
     }
 
@@ -114,10 +131,17 @@ public class FilebotService {
                 response);
         if (FilebotExecutionStatus.PROCESSED
                 .equals(filebotExecution.getStatus())) {
-            log.info("FINISH!!! STATUS PROCESSED.");
+            log.info("STATUS PROCESSED.");
             filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
             filebotConversationService.save(filebotConversation);
             producerService.sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
+            processNotProcessing();
+        } else if (FilebotExecutionStatus.FINISHED
+                .equals(filebotExecution.getStatus())) {
+            log.info("STATUS FINISHED.");
+            filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
+            filebotConversationService.save(filebotConversation);
+            producerService.sendFilebotExecutionTest(modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
             processNotProcessing();
         }
     }
@@ -144,7 +168,7 @@ public class FilebotService {
                 categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
                 if (FilebotExecutionStatus.PROCESSED
                         .equals(filebotExecution.getStatus())) {
-                    log.info("FINISH!!! STATUS PROCESSED.");
+                    log.info("STATUS PROCESSED.");
                     filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
                     filebotConversationService.save(filebotConversation);
                     producerService.sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
@@ -177,6 +201,17 @@ public class FilebotService {
         filebotNameSelection.setId(filebotExecutionIDTO.getId());
         filebotNameSelection.setFiles(filebotExecutionIDTO.getFiles());
         filebotNameSelection.setPath(filebotExecutionIDTO.getPath());
+        filebotNameSelection.setName(filebotExecutionIDTO.getName());
+        filebotNameSelection.setPossibilities(filebotExecutionIDTO.getPossibilities());
+        return filebotNameSelection;
+    }
+
+    private FilebotExecution convertToModel(FilebotExecutionTestIDTO filebotExecutionIDTO) {
+        FilebotExecution filebotNameSelection = new FilebotExecution();
+        filebotNameSelection.setId(filebotExecutionIDTO.getId());
+        filebotNameSelection.setFiles(filebotExecutionIDTO.getFiles());
+        filebotNameSelection.setPath(filebotExecutionIDTO.getPath());
+        filebotNameSelection.setName(filebotExecutionIDTO.getName());
         filebotNameSelection.setPossibilities(filebotExecutionIDTO.getPossibilities());
         return filebotNameSelection;
     }

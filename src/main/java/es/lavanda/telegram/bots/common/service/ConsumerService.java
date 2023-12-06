@@ -2,15 +2,11 @@ package es.lavanda.telegram.bots.common.service;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import es.lavanda.lib.common.model.FilebotExecutionIDTO;
+import es.lavanda.lib.common.model.FilebotExecutionTestIDTO;
 import es.lavanda.lib.common.model.TelegramFilebotExecutionODTO;
 import es.lavanda.telegram.bots.common.model.TelegramMessage;
-import es.lavanda.telegram.bots.filebot.model.FilebotExecution;
 import es.lavanda.telegram.bots.filebot.service.FilebotService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,33 +18,47 @@ public class ConsumerService {
 
     private final FilebotService filebotService;
 
+    private static final String FILEBOT_TELEGRAM = "filebot-telegram";
+
+    private static final String FILEBOT_TELEGRAM_TEST = "filebot-telegram-test";
+
+    private static final String TELEGRAM_QUERY_TMDB_RESOLUTION = "telegram-query-tmdb-resolution";
+
+    private static final String TELEGRAM_MESSAGES = "telegram-messages";
+
     // ***** FILEBOT SERVICE */
 
-    @RabbitListener(queues = "filebot-telegram")
+    @RabbitListener(queues = FILEBOT_TELEGRAM)
     public void consumeMessageFeedFilms(FilebotExecutionIDTO filebotExecutionIDTO) {
-        log.info("Reading message of the queue filebot-telegram: {}", filebotExecutionIDTO);
+        log.info("Reading message of the queue {}: {}", FILEBOT_TELEGRAM, filebotExecutionIDTO);
         filebotService.run(filebotExecutionIDTO);
-        log.info("Finish message of the queue filebot-telegram");
+        log.info("Finish message of the queue {}", FILEBOT_TELEGRAM);
     }
 
-    @RabbitListener(queues = "telegram-query-tmdb-resolution")
+    @RabbitListener(queues = FILEBOT_TELEGRAM_TEST)
+    public void consumeMessageFeedFilms(FilebotExecutionTestIDTO filebotExecutionTestIDTO) {
+        log.info("Reading message of the queue {}: {}", FILEBOT_TELEGRAM_TEST, filebotExecutionTestIDTO);
+        filebotService.runTest(filebotExecutionTestIDTO);
+        log.info("Finish message of the queue {}", FILEBOT_TELEGRAM_TEST);
+    }
+
+    @RabbitListener(queues = TELEGRAM_QUERY_TMDB_RESOLUTION)
     public void consumeMessageFeedFilms(TelegramFilebotExecutionODTO telegramFilebotExecutionODTO)
             throws InterruptedException {
-        log.info("Reading message of the queue telegram-query-tmdb-resolution: {}", telegramFilebotExecutionODTO);
+        log.info("Reading message of the queue {}: {}", TELEGRAM_QUERY_TMDB_RESOLUTION, telegramFilebotExecutionODTO);
         // log.info("Sleeping on this queue");
         // Thread.sleep(2000);
         // log.info("Finish sleeping on this queue");
         filebotService.recieveTMDBData(telegramFilebotExecutionODTO);
-        log.info("Finish message of the queue telegram-query-tmdb-resolution");
+        log.info("Finish message of the queue {}", TELEGRAM_QUERY_TMDB_RESOLUTION);
     }
 
-    // ***** CLASSIFY SERVICE */
-    // FIN
-    // ***** */
+    /* ***** CLASSIFY SERVICE ***** */
+    /* ***** FIN DE CLASSIFY SERVICE **** */
 
-    @RabbitListener(queues = "telegram-messages")
+    @RabbitListener(queues = TELEGRAM_MESSAGES)
     public void consumeMessageForSendMessages(TelegramMessage telegramMessage) {
-        log.info("Reading message of the queue telegram-messages: {}", telegramMessage);
+        log.info("Reading message of the queue {TELEGRAM_MESSAGES}: {}", TELEGRAM_MESSAGES, telegramMessage);
         switch (telegramMessage.getHandler()) {
             // case CLASSIFY:
             // classifyService.sendMessage(telegramMessage);
@@ -59,7 +69,7 @@ public class ConsumerService {
             default:
                 break;
         }
-        log.info("Finish message of the queue filebot-telegram-messages");
+        log.info("Finish message of the queue {}", TELEGRAM_MESSAGES);
     }
 
 }

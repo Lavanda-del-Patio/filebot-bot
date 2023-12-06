@@ -51,6 +51,8 @@ public class FilebotExecution implements Serializable {
 
     private Map<String, TMDBResultDTO> possibleChoicesTMDB = new HashMap<>();
 
+    private boolean approved;
+
     @CreatedDate
     @Field("created_at")
     private Date createdAt;
@@ -60,7 +62,7 @@ public class FilebotExecution implements Serializable {
     private Date lastModifiedAt;
 
     public enum FilebotExecutionStatus {
-        UNPROCESSED, CATEGORY, FORCE_STRICT, ACTION, TMDB, CHOICE, PROCESSED;
+        UNPROCESSED, CATEGORY, FORCE_STRICT, ACTION, TMDB, CHOICE, PROCESSED, TEST, FINISHED;
     }
 
     public FilebotExecutionStatus getPreviousStatus() {
