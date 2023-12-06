@@ -118,31 +118,37 @@ public class FilebotService {
                 .findByConversationStatus(FilebotConversationStatus.IN_PROGRESS);
         log.info("Handle callback message with chatId {} ,and response {}", chatId, response);
         FilebotExecution filebotExecution = filebotExecutionService
-                .getByStatusNotIn(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.UNPROCESSED));
-        if (TelegramUtils.BACK_BUTTON_KEY.equals(response)) {
-            log.info("Pressed back button");
-            deletePreviousMessage(filebotConversation);
-            filebotExecution = filebotExecutionService.setPreviousStatus(filebotExecution);
-            categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
+                .getOnCallback();
+        if (Objects.isNull(filebotExecution)) {
+            log.error("No filebotExecution on callback");
+            return;
         } else {
-            categoryExecutor.handleRequest(filebotConversation, filebotExecution, response);
-        }
-        log.info("Finish handle callback message with chatId {} ,and response {}", chatId,
-                response);
-        if (FilebotExecutionStatus.PROCESSED
-                .equals(filebotExecution.getStatus())) {
-            log.info("STATUS PROCESSED.");
-            filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
-            filebotConversationService.save(filebotConversation);
-            producerService.sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
-            processNotProcessing();
-        } else if (FilebotExecutionStatus.FINISHED
-                .equals(filebotExecution.getStatus())) {
-            log.info("STATUS FINISHED.");
-            filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
-            filebotConversationService.save(filebotConversation);
-            producerService.sendFilebotExecutionTest(modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
-            processNotProcessing();
+            if (TelegramUtils.BACK_BUTTON_KEY.equals(response)) {
+                log.info("Pressed back button");
+                deletePreviousMessage(filebotConversation);
+                filebotExecution = filebotExecutionService.setPreviousStatus(filebotExecution);
+                categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
+            } else {
+                categoryExecutor.handleRequest(filebotConversation, filebotExecution, response);
+            }
+            log.info("Finish handle callback message with chatId {} ,and response {}", chatId,
+                    response);
+            if (FilebotExecutionStatus.PROCESSED
+                    .equals(filebotExecution.getStatus())) {
+                log.info("STATUS PROCESSED.");
+                filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
+                filebotConversationService.save(filebotConversation);
+                producerService.sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
+                processNotProcessing();
+            } else if (FilebotExecutionStatus.FINISHED
+                    .equals(filebotExecution.getStatus())) {
+                log.info("STATUS FINISHED.");
+                filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
+                filebotConversationService.save(filebotConversation);
+                producerService
+                        .sendFilebotExecutionTest(modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
+                processNotProcessing();
+            }
         }
     }
 
