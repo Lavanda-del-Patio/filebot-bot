@@ -44,9 +44,12 @@ public class ActionExecutor implements Handler {
             if (Objects.nonNull(callbackResponse)) {
                 filebotExecution = assignAction(filebotExecution, callbackResponse);
                 callbackResponse = null;
+                filebotExecution.setOnCallback(false);
                 filebotExecution = updateStatus(filebotExecution);
                 sendEditMessageReplyMarkup(filebotConversation, filebotExecution.getAction());
             } else {
+                filebotExecution.setOnCallback(true);
+                filebotExecutionService.save(filebotExecution);
                 sendMessageToSelectAction(filebotExecution,
                         filebotConversation.getChatId());
             }

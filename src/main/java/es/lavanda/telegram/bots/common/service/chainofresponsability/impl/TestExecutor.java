@@ -43,6 +43,7 @@ public class TestExecutor implements Handler {
             if (Objects.nonNull(callbackResponse)) {
                 filebotExecution = approved(filebotExecution, callbackResponse);
                 callbackResponse = null;
+                filebotExecution.setOnCallback(false);
                 filebotExecution = updateStatus(filebotExecution);
                 sendEditMessageReplyMarkup(filebotConversation, filebotExecution);
             } else {

@@ -47,6 +47,8 @@ public class ChoiceExecutor implements Handler {
                     cleanOldMessages(filebotConversation);
                     sendMessage(String.format("Procesado correctamente %s", filebotExecution.getName()),
                             filebotConversation.getChatId());
+                    callbackResponse = null;
+                    filebotExecution.setOnCallback(false);
                     log.info("Processed telegramFilebotExecutionId: "
                             + filebotExecution.getPath());
                     filebotExecution = updateStatus(filebotExecution);
@@ -65,6 +67,8 @@ public class ChoiceExecutor implements Handler {
                 } else {
                     filebotExecution.setQuery(callbackResponse);
                     filebotExecution = updateStatus(filebotExecution);
+                    callbackResponse = null;
+                    filebotExecution.setOnCallback(false);
                     sendEditMessageReplyMarkup(filebotConversation, getEditMessageReply(filebotExecution));
                     sendMessage("Procesado correctamente", filebotConversation.getChatId());
                     cleanOldMessages(filebotConversation);

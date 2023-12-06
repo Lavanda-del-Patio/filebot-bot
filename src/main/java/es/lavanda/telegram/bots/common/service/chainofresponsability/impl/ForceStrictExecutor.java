@@ -43,6 +43,7 @@ public class ForceStrictExecutor implements Handler {
             if (Objects.nonNull(callbackResponse)) {
                 filebotExecution = assignForceStrict(filebotExecution, callbackResponse);
                 callbackResponse = null;
+                filebotExecution.setOnCallback(false);
                 sendEditMessageReplyMarkup(filebotConversation, filebotExecution.isForceStrict());
                 filebotExecution = updateStatus(filebotExecution);
             } else {

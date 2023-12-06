@@ -40,4 +40,8 @@ public class FilebotExecutionService {
         return filebotExecutionRepository.save(filebotExecution);
     }
 
+    public FilebotExecution getOnCallback() {
+        return filebotExecutionRepository.findByOnCallback(true);
+    }
+
 }

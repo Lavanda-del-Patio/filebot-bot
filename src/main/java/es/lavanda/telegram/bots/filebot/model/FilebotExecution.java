@@ -31,6 +31,8 @@ public class FilebotExecution implements Serializable {
 
     private String name;
 
+    private boolean onCallback;
+
     private List<String> files;
 
     private List<String> possibilities;
