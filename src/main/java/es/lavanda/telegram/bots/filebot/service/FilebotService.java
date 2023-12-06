@@ -229,7 +229,8 @@ public class FilebotService {
             if (Boolean.FALSE
                     .equals(FilebotConversationStatus.STOPPED.equals(filebotConversation.getConversationStatus()))) {
                 for (FilebotExecution filebotExecution : filebotExecutionService
-                        .getAllWithoutStatus(FilebotExecutionStatus.PROCESSED)) {
+                        .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED,
+                                FilebotExecutionStatus.TEST))) {
                     filebotExecution.setStatus(FilebotExecutionStatus.UNPROCESSED);
                     filebotExecutionService.save(filebotExecution);
                 }
@@ -237,9 +238,9 @@ public class FilebotService {
                 filebotConversationService.save(filebotConversation);
                 createSendMessageAndSendToRabbit("La conversación ha sido reiniciada para todos los usuarios activos",
                         filebotConversation.getChatId(), filebotConversation.getId());
+                processNotProcessing();
             }
         }
-        processNotProcessing();
     }
 
     public void recieveTMDBData(TelegramFilebotExecutionODTO telegramFilebotExecutionODTO) {

@@ -13,7 +13,7 @@ public interface FilebotExecutionRepository extends MongoRepository<FilebotExecu
 
     FilebotExecution findFirstByStatus(FilebotExecutionStatus unprocessed);
 
-    List<FilebotExecution> findAllByStatusNot(FilebotExecutionStatus processed);
+    List<FilebotExecution> findAllByStatusNotIn(List<FilebotExecutionStatus> processed);
 
     FilebotExecution findByStatusNotIn(List<FilebotExecutionStatus> filebotExecutionStatus);
 
