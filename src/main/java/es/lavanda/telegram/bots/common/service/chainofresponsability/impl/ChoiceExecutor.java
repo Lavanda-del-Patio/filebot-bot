@@ -87,23 +87,23 @@ public class ChoiceExecutor implements Handler {
         if (FilebotCategory.FILM.equals(filebotExecution.getCategory())) {
             return String.format("Seleccionado: %s",
                     filebotExecution.getPossibleChoicesTMDB()
-                            .get(filebotExecution.getSelectedPossibilities())
+                            .get(filebotExecution.getQuery())
                             .getTitle() +
                             " ("
                             +
                             filebotExecution.getPossibleChoicesTMDB()
-                                    .get(filebotExecution.getSelectedPossibilities())
+                                    .get(filebotExecution.getQuery())
                                     .getReleaseDate()
                             + ")");
         } else {
             return String.format("Seleccionado: %s",
                     filebotExecution.getPossibleChoicesTMDB()
-                            .get(filebotExecution.getSelectedPossibilities())
+                            .get(filebotExecution.getQuery())
                             .getName() +
                             " ("
                             +
                             filebotExecution.getPossibleChoicesTMDB()
-                                    .get(filebotExecution.getSelectedPossibilities())
+                                    .get(filebotExecution.getQuery())
                                     .getFirstAirDate()
                             + ")");
         }
