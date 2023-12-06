@@ -76,6 +76,8 @@ public class ChoiceExecutor implements Handler {
                             + filebotExecution.getPath());
                 }
             } else {
+                filebotExecution.setOnCallback(true);
+                filebotExecutionService.save(filebotExecution);
                 sendMessageToSelectChoice(filebotExecution,
                         filebotConversation.getChatId());
             }
