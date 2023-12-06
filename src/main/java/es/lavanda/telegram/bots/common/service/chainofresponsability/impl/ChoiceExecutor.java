@@ -69,6 +69,7 @@ public class ChoiceExecutor implements Handler {
                     filebotExecution = updateStatus(filebotExecution);
                     callbackResponse = null;
                     filebotExecution.setOnCallback(false);
+                    filebotExecutionService.save(filebotExecution);
                     sendEditMessageReplyMarkup(filebotConversation, getEditMessageReply(filebotExecution));
                     sendMessage("Procesado correctamente", filebotConversation.getChatId());
                     cleanOldMessages(filebotConversation);
@@ -77,7 +78,6 @@ public class ChoiceExecutor implements Handler {
                 }
             } else {
                 filebotExecution.setOnCallback(true);
-                filebotExecutionService.save(filebotExecution);
                 sendMessageToSelectChoice(filebotExecution,
                         filebotConversation.getChatId());
             }
