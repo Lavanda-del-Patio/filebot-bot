@@ -47,6 +47,8 @@ public class CategoryExecutor implements Handler {
                 filebotExecution = updateStatus(filebotExecution);
                 sendEditMessageReplyMarkup(filebotConversation, filebotExecution);
             } else {
+                filebotExecution.setOnCallback(true);
+                filebotExecutionService.save(filebotExecution);
                 sendMessageToSelectLabel(filebotExecution,
                         filebotConversation.getChatId());
             }

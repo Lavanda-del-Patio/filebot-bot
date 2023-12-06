@@ -47,6 +47,8 @@ public class ForceStrictExecutor implements Handler {
                 sendEditMessageReplyMarkup(filebotConversation, filebotExecution.isForceStrict());
                 filebotExecution = updateStatus(filebotExecution);
             } else {
+                filebotExecution.setOnCallback(true);
+                filebotExecutionService.save(filebotExecution);
                 sendMessageToForceStrict(filebotExecution,
                         filebotConversation.getChatId());
             }
