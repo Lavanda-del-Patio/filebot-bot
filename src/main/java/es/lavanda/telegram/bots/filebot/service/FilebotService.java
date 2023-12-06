@@ -235,9 +235,9 @@ public class FilebotService {
             if (Boolean.FALSE
                     .equals(FilebotConversationStatus.STOPPED.equals(filebotConversation.getConversationStatus()))) {
                 for (FilebotExecution filebotExecution : filebotExecutionService
-                        .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED,
-                                FilebotExecutionStatus.TEST))) {
+                        .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED))) {
                     filebotExecution.setStatus(FilebotExecutionStatus.UNPROCESSED);
+                    filebotExecution.setOnCallback(false);
                     filebotExecutionService.save(filebotExecution);
                 }
                 filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
