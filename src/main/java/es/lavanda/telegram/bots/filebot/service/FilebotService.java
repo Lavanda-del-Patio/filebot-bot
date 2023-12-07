@@ -263,6 +263,7 @@ public class FilebotService {
     private void sendMessageTelegramMessage(TelegramMessage message) {
         if (StringUtils.hasText(message.getText())) {
             SendMessage toSend = modelMapper.map(message, SendMessage.class);
+            toSend.setParseMode(null);
             if (Objects.nonNull(message.getInlineKeyboardMarkup()))
                 toSend.setReplyMarkup(message.getInlineKeyboardMarkup());
             if (Objects.nonNull(message.getReplyKeyboard()))
