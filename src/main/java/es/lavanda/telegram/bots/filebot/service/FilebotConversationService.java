@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import es.lavanda.telegram.bots.filebot.exception.FilebotException;
 import es.lavanda.telegram.bots.filebot.model.FilebotConversation;
-import es.lavanda.telegram.bots.filebot.model.FilebotConversation.FilebotConversationStatus;
 import es.lavanda.telegram.bots.filebot.repository.FilebotConversationRepository;
 
 @Service
@@ -33,13 +32,12 @@ public class FilebotConversationService {
         return filebotConversationRepository.findByChatId(chatId);
     }
 
-    public List<FilebotConversation> findAllByConversationStatus(
-            FilebotConversationStatus filebotConversationStatus) {
-        return filebotConversationRepository.findAllByConversationStatus(filebotConversationStatus);
+    public List<FilebotConversation> findAll() {
+        return filebotConversationRepository.findAll();
     }
 
-    public FilebotConversation findByConversationStatus(FilebotConversationStatus filebotConversationStatus) {
-        return filebotConversationRepository.findByConversationStatus(filebotConversationStatus);
+    public void deleteConversation(FilebotConversation filebotConversation) {
+        filebotConversationRepository.delete(filebotConversation);
     }
 
 }
