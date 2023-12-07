@@ -77,7 +77,7 @@ public class FilebotService {
     public void run(FilebotExecutionIDTO filebotExecutionIDTO) {
         FilebotExecution filebotExecution = convertToModel(filebotExecutionIDTO);
         filebotExecutionService.save(filebotExecution);
-        log.info("Saved");
+        log.info("Saved New");
     }
 
     public void runTest(FilebotExecutionTestIDTO filebotExecutionTestIDTO) {
@@ -87,8 +87,7 @@ public class FilebotService {
         oldFilebotExecution.setPossibilities(filebotExecutionNew.getPossibilities());
         oldFilebotExecution.setStatus(FilebotExecutionStatus.TEST);
         filebotExecutionService.save(oldFilebotExecution);
-        processNotProcessing();
-        log.info("Saved");
+        log.info("Saved Test {}", oldFilebotExecution.getName());
     }
 
     public void newConversation(String chatId, String name) {
@@ -165,11 +164,8 @@ public class FilebotService {
             FilebotExecution filebotExecution = filebotExecutionService
                     .getNextUnprocessed();
             if (Objects.nonNull(filebotExecution)) {
-                log.info("Processing filebotExecution {}", filebotExecution.getPath());
-                filebotExecution.setStatus(FilebotExecutionStatus.CATEGORY);
-                filebotExecutionService.save(filebotExecution);
-                filebotConversation.setConversationStatus(FilebotConversationStatus.IN_PROGRESS);
-                filebotConversationService.save(filebotConversation);
+                log.info("Processing filebotExecution {} on status {}", filebotExecution.getName(),
+                        filebotExecution.getStatus());
                 categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
                 if (FilebotExecutionStatus.PROCESSED
                         .equals(filebotExecution.getStatus())) {
