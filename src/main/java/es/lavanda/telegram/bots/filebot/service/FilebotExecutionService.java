@@ -23,7 +23,8 @@ public class FilebotExecutionService {
             if (FilebotExecutionStatus.UNPROCESSED.equals(filebotExecution.getStatus())
                     || FilebotExecutionStatus.TEST.equals(filebotExecution.getStatus())
                     || FilebotExecutionStatus.CHOICE.equals(filebotExecution.getStatus())) {
-                if (Boolean.FALSE.equals(filebotExecution.isOnCallback() && getOnCallback() != null)) {
+                if (Boolean.FALSE.equals(
+                        filebotExecution.isOnCallback() && Boolean.FALSE.equals(getOnCallback().isOnCallback()))) {
                     return Optional.of(filebotExecution);
                 }
             }
