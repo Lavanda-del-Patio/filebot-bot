@@ -78,6 +78,7 @@ public class FilebotService {
         FilebotExecution filebotExecution = convertToModel(filebotExecutionIDTO);
         filebotExecutionService.save(filebotExecution);
         log.info("Saved New");
+        processNotProcessing();
     }
 
     public void runTest(FilebotExecutionTestIDTO filebotExecutionTestIDTO) {
@@ -88,6 +89,7 @@ public class FilebotService {
         oldFilebotExecution.setStatus(FilebotExecutionStatus.TEST);
         filebotExecutionService.save(oldFilebotExecution);
         log.info("Saved Test {}", oldFilebotExecution.getName());
+        processNotProcessing();
     }
 
     public void newConversation(String chatId, String name) {
