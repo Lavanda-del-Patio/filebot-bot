@@ -143,14 +143,15 @@ public class FilebotService {
                         .equals(filebotExecution.getStatus())) {
                     log.info("STATUS PROCESSED.");
                     producerService.sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
+                    processNotProcessing();
                 } else if (FilebotExecutionStatus.FINISHED
                         .equals(filebotExecution.getStatus())) {
                     log.info("STATUS FINISHED.");
                     producerService
                             .sendFilebotExecutionTest(
                                     modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
+                    processNotProcessing();
                 }
-                processNotProcessing();
             }
         }
     }
@@ -181,12 +182,14 @@ public class FilebotService {
                     log.info("STATUS PROCESSED.");
                     producerService
                             .sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
+                    processNotProcessing();
                 } else if (FilebotExecutionStatus.FINISHED
                         .equals(filebotExecution.getStatus())) {
                     log.info("STATUS FINISHED.");
                     producerService
                             .sendFilebotExecutionTest(
                                     modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
+                    processNotProcessing();
                 }
             }
         }
