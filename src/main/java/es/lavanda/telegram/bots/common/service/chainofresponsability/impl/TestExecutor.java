@@ -104,7 +104,7 @@ public class TestExecutor implements Handler {
         });
         telegramMessage
                 .setText(String.format(
-                        "¿Apruebas la modificación?:",
+                        "¿Apruebas la modificación para %s?: \n\n%s",
                         filebotExecution.getName(), TelegramUtils.abbreviate(sb.toString(), 3000)));
         telegramMessage
                 .setInlineKeyboardMarkup(
