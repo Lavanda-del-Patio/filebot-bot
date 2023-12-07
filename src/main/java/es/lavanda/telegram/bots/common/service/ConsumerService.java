@@ -58,7 +58,7 @@ public class ConsumerService {
 
     @RabbitListener(queues = TELEGRAM_MESSAGES)
     public void consumeMessageForSendMessages(TelegramMessage telegramMessage) {
-        log.info("Reading message of the queue {TELEGRAM_MESSAGES}: {}", TELEGRAM_MESSAGES, telegramMessage);
+        log.info("Reading message of the queue {}: {}", TELEGRAM_MESSAGES, telegramMessage);
         switch (telegramMessage.getHandler()) {
             // case CLASSIFY:
             // classifyService.sendMessage(telegramMessage);
