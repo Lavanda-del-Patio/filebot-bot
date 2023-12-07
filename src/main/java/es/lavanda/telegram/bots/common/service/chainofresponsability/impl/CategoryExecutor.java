@@ -11,8 +11,10 @@ import es.lavanda.telegram.bots.common.model.TelegramMessage.MessageType;
 import es.lavanda.telegram.bots.common.service.ProducerService;
 import es.lavanda.telegram.bots.common.service.chainofresponsability.Handler;
 import es.lavanda.telegram.bots.filebot.model.FilebotConversation;
+import es.lavanda.telegram.bots.filebot.model.FilebotConversation.FilebotConversationStatus;
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution;
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution.FilebotExecutionStatus;
+import es.lavanda.telegram.bots.filebot.service.FilebotConversationService;
 import es.lavanda.telegram.bots.filebot.service.FilebotExecutionService;
 import es.lavanda.telegram.bots.filebot.utils.TelegramUtils;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,8 @@ public class CategoryExecutor implements Handler {
     private Handler next;
 
     private final FilebotExecutionService filebotExecutionService;
+
+    private final FilebotConversationService filebotConversationService;
 
     private final ProducerService producerService;
 
@@ -48,6 +52,9 @@ public class CategoryExecutor implements Handler {
                 sendEditMessageReplyMarkup(filebotConversation, filebotExecution);
             } else {
                 filebotExecution.setOnCallback(true);
+                filebotExecution.setStatus(FilebotExecutionStatus.CATEGORY);
+                filebotConversation.setConversationStatus(FilebotConversationStatus.IN_PROGRESS);
+                filebotConversationService.save(filebotConversation);
                 filebotExecutionService.save(filebotExecution);
                 sendMessageToSelectLabel(filebotExecution,
                         filebotConversation.getChatId());
