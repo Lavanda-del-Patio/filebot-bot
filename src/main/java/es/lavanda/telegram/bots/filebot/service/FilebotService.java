@@ -139,7 +139,6 @@ public class FilebotService {
                 filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
                 filebotConversationService.save(filebotConversation);
                 producerService.sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
-                processNotProcessing();
             } else if (FilebotExecutionStatus.FINISHED
                     .equals(filebotExecution.getStatus())) {
                 log.info("STATUS FINISHED.");
@@ -147,8 +146,8 @@ public class FilebotService {
                 filebotConversationService.save(filebotConversation);
                 producerService
                         .sendFilebotExecutionTest(modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
-                processNotProcessing();
             }
+            processNotProcessing();
         }
     }
 
@@ -178,8 +177,16 @@ public class FilebotService {
                     filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
                     filebotConversationService.save(filebotConversation);
                     producerService.sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
-                    processNotProcessing();
+                } else if (FilebotExecutionStatus.FINISHED
+                        .equals(filebotExecution.getStatus())) {
+                    log.info("STATUS FINISHED.");
+                    filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
+                    filebotConversationService.save(filebotConversation);
+                    producerService
+                            .sendFilebotExecutionTest(
+                                    modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
                 }
+                processNotProcessing();
             }
         }
     }
@@ -235,7 +242,8 @@ public class FilebotService {
             if (Boolean.FALSE
                     .equals(FilebotConversationStatus.STOPPED.equals(filebotConversation.getConversationStatus()))) {
                 for (FilebotExecution filebotExecution : filebotExecutionService
-                        .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED))) {
+                        .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED,
+                                FilebotExecutionStatus.TEST))) {
                     filebotExecution.setStatus(FilebotExecutionStatus.UNPROCESSED);
                     filebotExecution.setOnCallback(false);
                     filebotExecutionService.save(filebotExecution);

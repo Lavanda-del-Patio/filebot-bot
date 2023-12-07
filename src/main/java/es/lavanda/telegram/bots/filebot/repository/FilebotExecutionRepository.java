@@ -19,4 +19,6 @@ public interface FilebotExecutionRepository extends MongoRepository<FilebotExecu
 
     FilebotExecution findByOnCallback(boolean onCallback);
 
+    FilebotExecution findFirstByStatusIn(List<FilebotExecutionStatus> filebotExecutionStatus);
+
 }
