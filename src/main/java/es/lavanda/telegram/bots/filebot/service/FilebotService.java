@@ -186,33 +186,7 @@ public class FilebotService {
                     processNotProcessing();
                 }
             }, () -> log.info("No filebotExecution to process"));
-            // filebotExecutionService
-            // .getNextExecution().ifPresentOrElse(()->
-            // {
-            // log.info("Processing filebotExecution {} on status {}",
-            // filebotExecution.getName(),
-            // filebotExecution.getStatus());
-            // categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
-            // if (FilebotExecutionStatus.PROCESSED
-            // .equals(filebotExecution.getStatus())) {
-            // log.info("STATUS PROCESSED.");
-            // producerService
-            // .sendFilebotExecution(modelMapper.map(filebotExecution,
-            // FilebotExecutionODTO.class));
-            // processNotProcessing();
-            // } else if (FilebotExecutionStatus.FINISHED
-            // .equals(filebotExecution.getStatus())) {
-            // log.info("STATUS FINISHED.");
-            // producerService
-            // .sendFilebotExecutionTest(
-            // modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
-            // processNotProcessing();
-            // }
-            // }),
-            // ()-> log.info("No filebotExecution to process");));
-
         }
-
     }
 
     private void createSendMessageAndSendToRabbit(String text, String chatId, String filebotConversationId) {

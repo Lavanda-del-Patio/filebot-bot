@@ -14,7 +14,8 @@ public class ScheduleService {
 
     private final FilebotService filebotService;
 
-    @Scheduled(cron = "0 0/15 * * * *")
+    // @Scheduled(cron = "0 0/15 * * * *")
+    @Scheduled(fixedDelay = 60000)
     public void executeSchedule() {
         filebotService.processNotProcessing();
     }
