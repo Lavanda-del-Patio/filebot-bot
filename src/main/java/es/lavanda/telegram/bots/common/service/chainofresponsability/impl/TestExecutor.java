@@ -95,13 +95,13 @@ public class TestExecutor implements Handler {
         telegramMessage.setIdFilebotConversation(filebotExecution.getId());
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < filebotExecution.getFiles().size(); i++) {
-            sb.append("- " + filebotExecution.getFiles().get(i).trim() + " 👉🏻 "
+            sb.append("◦ " + filebotExecution.getFiles().get(i).trim() + " 👉🏻 "
                     + filebotExecution.getPossibilities().get(i).trim() + "\n");
         }
         telegramMessage
                 .setText(String.format(
-                        "¿Approve this name changing *%s* ?: \n%s",
-                        filebotExecution.getName(), TelegramUtils.abbreviate(sb.toString(), 3000)).trim());
+                        "Los cambios para *%s* son:\n*%s* \\¿Lo apruebas\\?",
+                        filebotExecution.getName(), TelegramUtils.abbreviate(sb.toString(), 3000)));
         telegramMessage
                 .setInlineKeyboardMarkup(
                         TelegramUtils.getInlineKeyboard(List.of("Si", "No"), false));
