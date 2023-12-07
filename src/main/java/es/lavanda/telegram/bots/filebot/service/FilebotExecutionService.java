@@ -16,7 +16,8 @@ public class FilebotExecutionService {
     private FilebotExecutionRepository filebotExecutionRepository;
 
     public FilebotExecution getNextUnprocessed() {
-        return filebotExecutionRepository.findFirstByStatus(FilebotExecution.FilebotExecutionStatus.UNPROCESSED);
+        return filebotExecutionRepository.findFirstByStatusIn(List
+                .of(FilebotExecution.FilebotExecutionStatus.UNPROCESSED, FilebotExecution.FilebotExecutionStatus.TEST));
     }
 
     public FilebotExecution save(FilebotExecution filebotExecution) {
