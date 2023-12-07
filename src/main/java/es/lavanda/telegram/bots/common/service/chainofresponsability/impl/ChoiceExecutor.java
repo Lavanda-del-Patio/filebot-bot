@@ -167,7 +167,7 @@ public class ChoiceExecutor implements Handler {
         TelegramMessage telegramMessage = new TelegramMessage();
         telegramMessage.setChatId(chatId);
         telegramMessage.setText(
-                "¿Cual crees que es?:");
+                String.format("¿Cual crees que puede ser? \n *%s*:", filebotExecution.getName()));
         telegramMessage.setInlineKeyboardMarkup(
                 TelegramUtils.getInlineKeyboardForChoices(filebotExecution.getPossibleChoicesTMDB(),
                         FilebotCategory.FILM.equals(filebotExecution.getCategory())));

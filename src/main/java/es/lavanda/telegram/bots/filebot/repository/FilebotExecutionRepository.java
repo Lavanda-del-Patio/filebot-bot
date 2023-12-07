@@ -11,17 +11,13 @@ import es.lavanda.telegram.bots.filebot.model.FilebotExecution.FilebotExecutionS
 @Repository
 public interface FilebotExecutionRepository extends MongoRepository<FilebotExecution, String> {
 
-    FilebotExecution findFirstByStatus(FilebotExecutionStatus unprocessed);
-
-    List<FilebotExecution> findAllByStatusNotInAndOnCallback(List<FilebotExecutionStatus> processed,
+    List<FilebotExecution> findAllByStatusNotInAndOnCallback(List<FilebotExecutionStatus> filebotExecutionStatus,
             boolean onCallback);
 
-    List<FilebotExecution> findAllByStatusNotIn(List<FilebotExecutionStatus> processed);
-
-    FilebotExecution findByStatusNotIn(List<FilebotExecutionStatus> filebotExecutionStatus);
-
-    FilebotExecution findByOnCallback(boolean onCallback);
+    List<FilebotExecution> findAllByStatusNotIn(List<FilebotExecutionStatus> filebotExecutionStatus);
 
     FilebotExecution findFirstByStatusIn(List<FilebotExecutionStatus> filebotExecutionStatus);
+
+    FilebotExecution findByOnCallback(boolean b);
 
 }
