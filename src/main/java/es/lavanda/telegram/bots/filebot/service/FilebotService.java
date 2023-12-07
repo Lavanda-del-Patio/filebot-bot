@@ -2,6 +2,7 @@ package es.lavanda.telegram.bots.filebot.service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -31,7 +32,6 @@ import es.lavanda.telegram.bots.common.service.chainofresponsability.impl.TMDBEx
 import es.lavanda.telegram.bots.common.service.chainofresponsability.impl.TestExecutor;
 import es.lavanda.telegram.bots.filebot.handler.FilebotHandler;
 import es.lavanda.telegram.bots.filebot.model.FilebotConversation;
-import es.lavanda.telegram.bots.filebot.model.FilebotConversation.FilebotConversationStatus;
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution;
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution.FilebotExecutionStatus;
 import es.lavanda.telegram.bots.filebot.utils.TelegramUtils;
@@ -92,8 +92,6 @@ public class FilebotService {
 
     public void newConversation(String chatId, String name) {
         filebotConversationService.findByChatId(chatId).ifPresentOrElse((filebotConversation) -> {
-            filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
-            filebotConversationService.save(filebotConversation);
             createSendMessageAndSendToRabbit(
                     "Iniciado. Quedo a la espera de poder mandarte posibles ficheros a procesar.", chatId,
                     null);
@@ -101,8 +99,10 @@ public class FilebotService {
             FilebotConversation filebotConversation = new FilebotConversation();
             filebotConversation.setChatId(chatId);
             filebotConversation.setName(name);
-            filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
             filebotConversationService.save(filebotConversation);
+            createSendMessageAndSendToRabbit(
+                    "Iniciado. Quedo a la espera de poder mandarte posibles ficheros a procesar.", chatId,
+                    null);
         });
         processNotProcessing();
     }
@@ -113,40 +113,43 @@ public class FilebotService {
 
     public void handleCallbackResponse(String chatId, String messageId, String response) {
         log.info("Handle callback message");
-        FilebotConversation filebotConversation = filebotConversationService
-                .findByConversationStatus(FilebotConversationStatus.IN_PROGRESS);
-        log.info("Handle callback message with chatId {} ,and response {}", chatId, response);
-        FilebotExecution filebotExecution = filebotExecutionService
-                .getOnCallback();
-        if (Objects.isNull(filebotExecution)) {
-            log.error("No filebotExecution on callback");
+        Optional<FilebotConversation> optFilebotConversation = filebotConversationService
+                .findByChatId(chatId);
+        if (optFilebotConversation.isEmpty()) {
+            log.error("No filebotConversation with chatId {}", chatId);
             return;
         } else {
-            if (TelegramUtils.BACK_BUTTON_KEY.equals(response)) {
-                log.info("Pressed back button");
-                deletePreviousMessage(filebotConversation);
-                filebotExecution = filebotExecutionService.setPreviousStatus(filebotExecution);
-                categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
+            FilebotConversation filebotConversation = optFilebotConversation.get();
+            log.info("Handle callback message with chatId {} ,and response {}", chatId, response);
+            FilebotExecution filebotExecution = filebotExecutionService
+                    .getOnCallback();
+            if (Objects.isNull(filebotExecution)) {
+                log.error("No filebotExecution on callback");
+                return;
             } else {
-                categoryExecutor.handleRequest(filebotConversation, filebotExecution, response);
+                if (TelegramUtils.BACK_BUTTON_KEY.equals(response)) {
+                    log.info("Pressed back button");
+                    deletePreviousMessage(filebotConversation);
+                    filebotExecution = filebotExecutionService.setPreviousStatus(filebotExecution);
+                    categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
+                } else {
+                    categoryExecutor.handleRequest(filebotConversation, filebotExecution, response);
+                }
+                log.info("Finish handle callback message with chatId {} ,and response {}", chatId,
+                        response);
+                if (FilebotExecutionStatus.PROCESSED
+                        .equals(filebotExecution.getStatus())) {
+                    log.info("STATUS PROCESSED.");
+                    producerService.sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
+                } else if (FilebotExecutionStatus.FINISHED
+                        .equals(filebotExecution.getStatus())) {
+                    log.info("STATUS FINISHED.");
+                    producerService
+                            .sendFilebotExecutionTest(
+                                    modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
+                }
+                processNotProcessing();
             }
-            log.info("Finish handle callback message with chatId {} ,and response {}", chatId,
-                    response);
-            if (FilebotExecutionStatus.PROCESSED
-                    .equals(filebotExecution.getStatus())) {
-                log.info("STATUS PROCESSED.");
-                filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
-                filebotConversationService.save(filebotConversation);
-                producerService.sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
-            } else if (FilebotExecutionStatus.FINISHED
-                    .equals(filebotExecution.getStatus())) {
-                log.info("STATUS FINISHED.");
-                filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
-                filebotConversationService.save(filebotConversation);
-                producerService
-                        .sendFilebotExecutionTest(modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
-            }
-            processNotProcessing();
         }
     }
 
@@ -157,27 +160,24 @@ public class FilebotService {
     public void processNotProcessing() {
         log.info("processNotProcessing for all Idles");
         List<FilebotConversation> filebotConversations = filebotConversationService
-                .findAllByConversationStatus(FilebotConversationStatus.IDLE);
+                .findAll();
         if (filebotConversations.size() > 0) {
             FilebotConversation filebotConversation = filebotConversations.get(0);
             log.info("Processing filebotConversation {}", filebotConversation.getName());
-            FilebotExecution filebotExecution = filebotExecutionService
-                    .getNextUnprocessed();
-            if (Objects.nonNull(filebotExecution)) {
+            List<FilebotExecution> filebotExecutions = filebotExecutionService
+                    .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED));
+            if (filebotExecutions.size() > 0 && Boolean.FALSE.equals(filebotExecutions.get(0).isOnCallback())) {
+                FilebotExecution filebotExecution = filebotExecutions.get(0);
                 log.info("Processing filebotExecution {} on status {}", filebotExecution.getName(),
                         filebotExecution.getStatus());
                 categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
                 if (FilebotExecutionStatus.PROCESSED
                         .equals(filebotExecution.getStatus())) {
                     log.info("STATUS PROCESSED.");
-                    filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
-                    filebotConversationService.save(filebotConversation);
                     producerService.sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
                 } else if (FilebotExecutionStatus.FINISHED
                         .equals(filebotExecution.getStatus())) {
                     log.info("STATUS FINISHED.");
-                    filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
-                    filebotConversationService.save(filebotConversation);
                     producerService
                             .sendFilebotExecutionTest(
                                     modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
@@ -227,30 +227,25 @@ public class FilebotService {
 
     public void stopConversation(String chatId) {
         FilebotConversation filebotConversation = filebotConversationService.findByChatId(chatId).get();
-        filebotConversation.setConversationStatus(FilebotConversationStatus.STOPPED);
-        filebotConversationService.save(filebotConversation);
         createSendMessageAndSendToRabbit("La conversación ha sido detenida", chatId, filebotConversation.getId());
+        filebotConversationService.deleteConversation(filebotConversation);
     }
 
     public void resetAllStatus() {
         List<FilebotConversation> filebotConversations = filebotConversationService.getFilebotConversations();
         for (FilebotConversation filebotConversation : filebotConversations) {
-            if (Boolean.FALSE
-                    .equals(FilebotConversationStatus.STOPPED.equals(filebotConversation.getConversationStatus()))) {
-                for (FilebotExecution filebotExecution : filebotExecutionService
-                        .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED,
-                                FilebotExecutionStatus.TEST))) {
-                    filebotExecution.setStatus(FilebotExecutionStatus.UNPROCESSED);
-                    filebotExecution.setOnCallback(false);
-                    filebotExecutionService.save(filebotExecution);
-                }
-                filebotConversation.setConversationStatus(FilebotConversationStatus.IDLE);
-                filebotConversationService.save(filebotConversation);
-                createSendMessageAndSendToRabbit("La conversación ha sido reiniciada para todos los usuarios activos",
-                        filebotConversation.getChatId(), filebotConversation.getId());
-                processNotProcessing();
+            for (FilebotExecution filebotExecution : filebotExecutionService
+                    .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED,
+                            FilebotExecutionStatus.TEST))) {
+                filebotExecution.setStatus(FilebotExecutionStatus.UNPROCESSED);
+                filebotExecution.setOnCallback(false);
+                filebotExecutionService.save(filebotExecution);
             }
+            createSendMessageAndSendToRabbit("La conversación ha sido reiniciada para todos los usuarios activos",
+                    filebotConversation.getChatId(), filebotConversation.getId());
+            processNotProcessing();
         }
+
     }
 
     public void recieveTMDBData(TelegramFilebotExecutionODTO telegramFilebotExecutionODTO) {
@@ -260,9 +255,7 @@ public class FilebotService {
                 .setPossibleChoicesTMDB(telegramFilebotExecutionODTO.getPossibleChoices());
         filebotExecution.setStatus(FilebotExecutionStatus.CHOICE);
         filebotExecutionService.save(filebotExecution);
-        FilebotConversation filebotConversation = filebotConversationService
-                .findByConversationStatus(FilebotConversationStatus.IN_PROGRESS);
-        categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
+        processNotProcessing();
     }
 
     private void sendMessageTelegramMessage(TelegramMessage message) {

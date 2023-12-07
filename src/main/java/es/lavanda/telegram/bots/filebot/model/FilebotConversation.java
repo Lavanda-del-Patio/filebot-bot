@@ -21,8 +21,6 @@ public class FilebotConversation {
 
     private String chatId;
 
-    private FilebotConversationStatus conversationStatus;
-
     private String previousMessageId;
 
     private List<String> inlineKeyboardMessageIds = new ArrayList<>();
@@ -30,9 +28,5 @@ public class FilebotConversation {
     private List<String> photosMessageIds = new ArrayList<>();
 
     private List<String> callbackData = new ArrayList<>();
-
-    public enum FilebotConversationStatus {
-        IDLE, IN_PROGRESS, STOPPED;
-    }
 
 }
