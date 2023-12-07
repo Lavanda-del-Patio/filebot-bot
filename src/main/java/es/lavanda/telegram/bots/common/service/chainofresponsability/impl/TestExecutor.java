@@ -101,7 +101,7 @@ public class TestExecutor implements Handler {
         telegramMessage
                 .setText(String.format(
                         "¿Approve this name changing *%s* ?: \n%s",
-                        filebotExecution.getName(), TelegramUtils.abbreviate(sb.toString(), 400)));
+                        filebotExecution.getName(), TelegramUtils.abbreviate(sb.toString(), 3000)).trim());
         telegramMessage
                 .setInlineKeyboardMarkup(
                         TelegramUtils.getInlineKeyboard(List.of("Si", "No"), false));
