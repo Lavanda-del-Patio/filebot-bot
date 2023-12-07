@@ -13,6 +13,7 @@ import es.lavanda.telegram.bots.common.service.chainofresponsability.Handler;
 import es.lavanda.telegram.bots.filebot.model.FilebotConversation;
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution;
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution.FilebotExecutionStatus;
+import es.lavanda.telegram.bots.filebot.service.FilebotExecutionService;
 import es.lavanda.telegram.bots.filebot.utils.TelegramUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,8 @@ public class TMDBExecutor implements Handler {
     private Handler next;
 
     private final ProducerService producerService;
+
+    private final FilebotExecutionService filebotExecutionService;
 
     @Override
     public void setNext(Handler handler) {
@@ -40,6 +43,8 @@ public class TMDBExecutor implements Handler {
             sendMessageToGiveFeedback(filebotExecution,
                     filebotConversation.getChatId());
             sendToTMDBMicroservice(filebotExecution);
+            filebotExecution.setStatus(FilebotExecutionStatus.CHECKING_ON_TMDB);
+            filebotExecutionService.save(filebotExecution);
             next.handleRequest(filebotConversation, filebotExecution, callbackResponse);
         } else if (next != null) {
             next.handleRequest(filebotConversation, filebotExecution, callbackResponse);

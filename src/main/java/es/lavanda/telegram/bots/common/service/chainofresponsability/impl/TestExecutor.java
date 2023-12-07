@@ -52,7 +52,9 @@ public class TestExecutor implements Handler {
                 sendMessageToApprove(filebotExecution,
                         filebotConversation.getChatId());
             }
-            next.handleRequest(filebotConversation, filebotExecution, callbackResponse);
+            if (Objects.nonNull(next)) {
+                next.handleRequest(filebotConversation, filebotExecution, callbackResponse);
+            }
         } else if (next != null) {
             next.handleRequest(filebotConversation, filebotExecution, callbackResponse);
         }
@@ -84,7 +86,7 @@ public class TestExecutor implements Handler {
         telegramMessage.setHandler(MessageHandler.FILEBOT);
         telegramMessage.setType(MessageType.EDIT_MESSAGE);
         telegramMessage.setMessageId(filebotConversation.getPreviousMessageId());
-        telegramMessage.setText(String.format("Aprobado!"));
+        telegramMessage.setText(String.format("Finalizado!"));
         producerService.sendTelegramMessage(telegramMessage);
     }
 
@@ -100,7 +102,7 @@ public class TestExecutor implements Handler {
         }
         telegramMessage
                 .setText(String.format(
-                        "Los cambios para *%s* son:\n*%s* \\¿Lo apruebas\\?",
+                        "Los cambios para *%s* son:\n*%s* ¿Lo apruebas?",
                         filebotExecution.getName(), TelegramUtils.abbreviate(sb.toString(), 3000)));
         telegramMessage
                 .setInlineKeyboardMarkup(

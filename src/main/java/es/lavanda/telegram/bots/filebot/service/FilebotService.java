@@ -167,7 +167,9 @@ public class FilebotService {
             FilebotConversation filebotConversation = filebotConversations.get(0);
             log.info("Processing filebotConversation {}", filebotConversation.getName());
             List<FilebotExecution> filebotExecutions = filebotExecutionService
-                    .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED),
+                    .getAllWithoutStatus(
+                            List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED,
+                                    FilebotExecutionStatus.CHECKING_ON_TMDB),
                             false);
             for (FilebotExecution filebotExecution : filebotExecutions) {
                 log.info("Processing filebotExecution {} on status {}", filebotExecution.getName(),
