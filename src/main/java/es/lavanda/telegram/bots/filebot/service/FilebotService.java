@@ -167,13 +167,7 @@ public class FilebotService {
         if (filebotConversations.size() > 0) {
             FilebotConversation filebotConversation = filebotConversations.get(0);
             log.info("Processing filebotConversation {}", filebotConversation.getName());
-            List<FilebotExecution> filebotExecutions = filebotExecutionService
-                    .getAllWithoutStatus(
-                            List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED,
-                                    FilebotExecutionStatus.CHECKING_ON_TMDB),
-                            false);
-            if (filebotExecutions.size() > 0) {
-                FilebotExecution filebotExecution = filebotExecutions.get(0);
+            filebotExecutionService.getNextExecution().ifPresentOrElse((filebotExecution) -> {
                 log.info("Processing filebotExecution {} on status {}", filebotExecution.getName(),
                         filebotExecution.getStatus());
                 categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
@@ -191,8 +185,34 @@ public class FilebotService {
                                     modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
                     processNotProcessing();
                 }
-            }
+            }, () -> log.info("No filebotExecution to process"));
+            // filebotExecutionService
+            // .getNextExecution().ifPresentOrElse(()->
+            // {
+            // log.info("Processing filebotExecution {} on status {}",
+            // filebotExecution.getName(),
+            // filebotExecution.getStatus());
+            // categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
+            // if (FilebotExecutionStatus.PROCESSED
+            // .equals(filebotExecution.getStatus())) {
+            // log.info("STATUS PROCESSED.");
+            // producerService
+            // .sendFilebotExecution(modelMapper.map(filebotExecution,
+            // FilebotExecutionODTO.class));
+            // processNotProcessing();
+            // } else if (FilebotExecutionStatus.FINISHED
+            // .equals(filebotExecution.getStatus())) {
+            // log.info("STATUS FINISHED.");
+            // producerService
+            // .sendFilebotExecutionTest(
+            // modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
+            // processNotProcessing();
+            // }
+            // }),
+            // ()-> log.info("No filebotExecution to process");));
+
         }
+
     }
 
     private void createSendMessageAndSendToRabbit(String text, String chatId, String filebotConversationId) {
