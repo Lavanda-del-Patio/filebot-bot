@@ -24,9 +24,14 @@ public class FilebotExecutionService {
         return filebotExecutionRepository.save(filebotExecution);
     }
 
-    public List<FilebotExecution> getAllWithoutStatus(List<FilebotExecutionStatus> processed) {
+    public List<FilebotExecution> getAllWithoutStatus(List<FilebotExecutionStatus> processed, boolean onCallback) {
+        return filebotExecutionRepository.findAllByStatusNotInAndOnCallback(processed, onCallback);
+    }
+
+     public List<FilebotExecution> getAllWithoutStatus(List<FilebotExecutionStatus> processed) {
         return filebotExecutionRepository.findAllByStatusNotIn(processed);
     }
+
 
     public FilebotExecution getByStatusNotIn(List<FilebotExecutionStatus> filebotExecutionStatus) {
         return filebotExecutionRepository.findByStatusNotIn(filebotExecutionStatus);

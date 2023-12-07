@@ -165,7 +165,8 @@ public class FilebotService {
             FilebotConversation filebotConversation = filebotConversations.get(0);
             log.info("Processing filebotConversation {}", filebotConversation.getName());
             List<FilebotExecution> filebotExecutions = filebotExecutionService
-                    .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED));
+                    .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED),
+                            false);
             if (filebotExecutions.size() > 0 && Boolean.FALSE.equals(filebotExecutions.get(0).isOnCallback())) {
                 FilebotExecution filebotExecution = filebotExecutions.get(0);
                 log.info("Processing filebotExecution {} on status {}", filebotExecution.getName(),
