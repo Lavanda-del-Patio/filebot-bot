@@ -167,15 +167,15 @@ public class FilebotService {
             List<FilebotExecution> filebotExecutions = filebotExecutionService
                     .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED),
                             false);
-            if (filebotExecutions.size() > 0 && Boolean.FALSE.equals(filebotExecutions.get(0).isOnCallback())) {
-                FilebotExecution filebotExecution = filebotExecutions.get(0);
+            for (FilebotExecution filebotExecution : filebotExecutions) {
                 log.info("Processing filebotExecution {} on status {}", filebotExecution.getName(),
                         filebotExecution.getStatus());
                 categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
                 if (FilebotExecutionStatus.PROCESSED
                         .equals(filebotExecution.getStatus())) {
                     log.info("STATUS PROCESSED.");
-                    producerService.sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
+                    producerService
+                            .sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
                 } else if (FilebotExecutionStatus.FINISHED
                         .equals(filebotExecution.getStatus())) {
                     log.info("STATUS FINISHED.");
@@ -183,7 +183,6 @@ public class FilebotService {
                             .sendFilebotExecutionTest(
                                     modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
                 }
-                processNotProcessing();
             }
         }
     }
