@@ -38,7 +38,7 @@ public class CategoryExecutor implements Handler {
     public void handleRequest(FilebotConversation filebotConversation, FilebotExecution filebotExecution,
             String callbackResponse) {
         if (filebotExecution.getStatus()
-                .equals(FilebotExecutionStatus.CATEGORY)) {
+                .equals(FilebotExecutionStatus.UNPROCESSED)) {
             log.info("Category Executor Link");
             if (Objects.nonNull(callbackResponse)) {
                 filebotExecution = assignCategory(filebotExecution, callbackResponse);
