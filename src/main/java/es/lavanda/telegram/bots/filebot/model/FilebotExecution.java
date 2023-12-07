@@ -64,7 +64,7 @@ public class FilebotExecution implements Serializable {
     private Date lastModifiedAt;
 
     public enum FilebotExecutionStatus {
-        UNPROCESSED, CATEGORY, FORCE_STRICT, ACTION, TMDB, CHOICE, PROCESSED, TEST, FINISHED;
+        UNPROCESSED, CATEGORY, FORCE_STRICT, ACTION, CHECKING_ON_TMDB, TMDB, CHOICE, PROCESSED, TEST, FINISHED;
     }
 
     public FilebotExecutionStatus getPreviousStatus() {
