@@ -171,7 +171,8 @@ public class FilebotService {
                             List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED,
                                     FilebotExecutionStatus.CHECKING_ON_TMDB),
                             false);
-            for (FilebotExecution filebotExecution : filebotExecutions) {
+            if (filebotExecutions.size() > 0) {
+                FilebotExecution filebotExecution = filebotExecutions.get(0);
                 log.info("Processing filebotExecution {} on status {}", filebotExecution.getName(),
                         filebotExecution.getStatus());
                 categoryExecutor.handleRequest(filebotConversation, filebotExecution, null);
