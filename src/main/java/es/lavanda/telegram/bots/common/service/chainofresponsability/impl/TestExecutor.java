@@ -99,13 +99,10 @@ public class TestExecutor implements Handler {
                     + filebotExecution.getPossibilities().get(i).trim());
             sb.append("\n");
         }
-        filebotExecution.getFiles().forEach(f -> {
-
-        });
         telegramMessage
                 .setText(String.format(
                         "¿Apruebas la modificación para %s?: \n\n%s",
-                        filebotExecution.getName(), TelegramUtils.abbreviate(sb.toString(), 3000)));
+                        filebotExecution.getName(), TelegramUtils.abbreviate(sb.toString(), 400)));
         telegramMessage
                 .setInlineKeyboardMarkup(
                         TelegramUtils.getInlineKeyboard(List.of("Si", "No"), false));
