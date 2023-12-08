@@ -1,6 +1,7 @@
 package es.lavanda.telegram.bots.filebot.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +26,22 @@ public class FilebotExecutionService {
             if (FilebotExecutionStatus.UNPROCESSED.equals(filebotExecution.getStatus())
                     || FilebotExecutionStatus.TEST.equals(filebotExecution.getStatus())
                     || FilebotExecutionStatus.CHOICE.equals(filebotExecution.getStatus())) {
-                log.info("getNextExecution: " + filebotExecution.getName() + " " + filebotExecution.getStatus() + " "
-                        + filebotExecution.isOnCallback() + " " + getOnCallback().isOnCallback());
-                if (Boolean.FALSE.equals(
-                        filebotExecution.isOnCallback() && Boolean.FALSE.equals(getOnCallback().isOnCallback()))) {
-                    log.info("getNextExecution-IN: " + filebotExecution.getName() + " " + filebotExecution.getStatus());
-                    return Optional.of(filebotExecution);
+                FilebotExecution onCallback = getOnCallback();
+                if (Objects.isNull(onCallback)) {
+                    log.info(
+                            "getNextExecution: " + filebotExecution.getName() + " " + filebotExecution.getStatus() + " "
+                                    + filebotExecution.isOnCallback());
+                    if (Boolean.FALSE.equals(
+                            filebotExecution.isOnCallback())) {
+                        log.info("getNextExecution-IN: " + filebotExecution.getName() + " "
+                                + filebotExecution.getStatus());
+                        return Optional.of(filebotExecution);
+                    }
                 }
             }
         }
         return Optional.empty();
+
     }
 
     public List<FilebotExecution> getAllWithoutStatus(List<FilebotExecutionStatus> filebotExecutionStatus) {
