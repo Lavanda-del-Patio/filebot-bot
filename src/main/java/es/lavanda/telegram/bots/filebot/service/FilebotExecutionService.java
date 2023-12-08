@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution;
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution.FilebotExecutionStatus;
 import es.lavanda.telegram.bots.filebot.repository.FilebotExecutionRepository;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class FilebotExecutionService {
 
     @Autowired
@@ -23,8 +25,11 @@ public class FilebotExecutionService {
             if (FilebotExecutionStatus.UNPROCESSED.equals(filebotExecution.getStatus())
                     || FilebotExecutionStatus.TEST.equals(filebotExecution.getStatus())
                     || FilebotExecutionStatus.CHOICE.equals(filebotExecution.getStatus())) {
+                log.info("getNextExecution: " + filebotExecution.getName() + " " + filebotExecution.getStatus() + " "
+                        + filebotExecution.isOnCallback() + " " + getOnCallback().isOnCallback());
                 if (Boolean.FALSE.equals(
                         filebotExecution.isOnCallback() && Boolean.FALSE.equals(getOnCallback().isOnCallback()))) {
+                    log.info("getNextExecution-IN: " + filebotExecution.getName() + " " + filebotExecution.getStatus());
                     return Optional.of(filebotExecution);
                 }
             }
