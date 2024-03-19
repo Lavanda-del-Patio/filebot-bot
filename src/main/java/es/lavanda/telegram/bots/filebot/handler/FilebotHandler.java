@@ -8,11 +8,11 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.MaybeInaccessibleMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import es.lavanda.telegram.bots.common.model.TelegramMessage;
 import es.lavanda.telegram.bots.filebot.config.FilebotConfig;
 import es.lavanda.telegram.bots.filebot.exception.FilebotException;
 import es.lavanda.telegram.bots.filebot.service.FilebotService;
@@ -48,8 +48,8 @@ public class FilebotHandler extends TelegramLongPollingBot {
                 }
             } else if (Objects.nonNull(update.getCallbackQuery())) {
                 log.info("Authorized getCallbackQuery");
-                Message message = update.getCallbackQuery().getMessage();
-                if (message.hasText()) {
+                MaybeInaccessibleMessage maybeInaccessibleMessage = update.getCallbackQuery().getMessage();
+                if (maybeInaccessibleMessage instanceof Message && ((Message) maybeInaccessibleMessage).hasText()) {
                     handleCallbackMessage(update.getCallbackQuery());
                 }
             } else {
@@ -133,6 +133,4 @@ public class FilebotHandler extends TelegramLongPollingBot {
     private boolean isAuthorized(String username) {
         return botConfig.isAuthorizedToUseBot(username);
     }
-
-   
 }
