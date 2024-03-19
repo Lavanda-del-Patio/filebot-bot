@@ -14,6 +14,7 @@ import es.lavanda.telegram.bots.common.service.chainofresponsability.Handler;
 import es.lavanda.telegram.bots.filebot.model.FilebotConversation;
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution;
 import es.lavanda.telegram.bots.filebot.model.FilebotExecution.FilebotExecutionStatus;
+import es.lavanda.telegram.bots.filebot.service.ElectedService;
 import es.lavanda.telegram.bots.filebot.service.FilebotExecutionService;
 import es.lavanda.telegram.bots.filebot.utils.TelegramUtils;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,8 @@ public class ChoiceExecutor implements Handler {
     private final FilebotExecutionService filebotExecutionService;
 
     private final ProducerService producerService;
+
+    private final ElectedService electedService;
 
     @Override
     public void setNext(Handler handler) {
@@ -52,7 +55,7 @@ public class ChoiceExecutor implements Handler {
                     log.info("Processed telegramFilebotExecutionId: "
                             + filebotExecution.getPath());
                     filebotExecution = updateStatus(filebotExecution);
-                } else if ("data".startsWith(callbackResponse)) {
+                } else if (callbackResponse.startsWith("data")) {
                     String idTMDB = callbackResponse.split("data")[1];
                     TMDBResultDTO resultToMoreData = filebotExecution
                             .getPossibleChoicesTMDB().get(idTMDB);
@@ -67,9 +70,12 @@ public class ChoiceExecutor implements Handler {
                 } else {
                     filebotExecution.setQuery(callbackResponse);
                     filebotExecution = updateStatus(filebotExecution);
+                    TMDBResultDTO resultToMoreData = filebotExecution
+                            .getPossibleChoicesTMDB().get(callbackResponse);
                     callbackResponse = null;
                     filebotExecution.setOnCallback(false);
                     filebotExecutionService.save(filebotExecution);
+                    electedService.save(filebotExecution, getShowNameOrFilm(resultToMoreData, filebotExecution));
                     sendEditMessageReplyMarkup(filebotConversation, getEditMessageReply(filebotExecution));
                     sendMessage("Procesado correctamente", filebotConversation.getChatId());
                     cleanOldMessages(filebotConversation);
@@ -87,6 +93,14 @@ public class ChoiceExecutor implements Handler {
             }
         } else if (next != null) {
             next.handleRequest(filebotConversation, filebotExecution, callbackResponse);
+        }
+    }
+
+    private String getShowNameOrFilm(TMDBResultDTO result, FilebotExecution filebotExecution) {
+        if (FilebotCategory.FILM.equals(filebotExecution.getCategory())) {
+            return result.getTitle() + " (" + result.getReleaseDate() + ") - " + filebotExecution.getCategory();
+        } else {
+            return result.getName() + " (" + result.getFirstAirDate() + ") - " + filebotExecution.getCategory();
         }
     }
 

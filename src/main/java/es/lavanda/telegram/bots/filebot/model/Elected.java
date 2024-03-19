@@ -1,17 +1,26 @@
 package es.lavanda.telegram.bots.filebot.model;
 
-import lombok.AllArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import es.lavanda.lib.common.model.FilebotExecutionODTO;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
+@Document("filebot_elected")
 public class Elected {
-    
+
+    @Id
+    private String id;
+
     private int times;
 
     private String name;
 
-    private String releaseDate;
+    private FilebotExecutionODTO filebotExecutionODTO;
 
-    private int tmdbId;
+    public void setTimes(int times) {
+        final int maxTimes = 10;
+        this.times = Math.min(times, maxTimes);
+    }
 }

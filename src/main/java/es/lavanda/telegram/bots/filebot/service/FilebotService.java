@@ -143,15 +143,14 @@ public class FilebotService {
                         .equals(filebotExecution.getStatus())) {
                     log.info("STATUS PROCESSED.");
                     producerService.sendFilebotExecution(modelMapper.map(filebotExecution, FilebotExecutionODTO.class));
-                    processNotProcessing();
                 } else if (FilebotExecutionStatus.FINISHED
                         .equals(filebotExecution.getStatus())) {
                     log.info("STATUS FINISHED.");
                     producerService
                             .sendFilebotExecutionTest(
                                     modelMapper.map(filebotExecution, FilebotExecutionTestODTO.class));
-                    processNotProcessing();
                 }
+                processNotProcessing();
             }
         }
     }
@@ -237,9 +236,10 @@ public class FilebotService {
         List<FilebotConversation> filebotConversations = filebotConversationService.getFilebotConversations();
         for (FilebotConversation filebotConversation : filebotConversations) {
             for (FilebotExecution filebotExecution : filebotExecutionService
-                    .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED,
-                            FilebotExecutionStatus.TEST))) {
-                filebotExecution.setStatus(FilebotExecutionStatus.UNPROCESSED);
+                    .getAllWithoutStatus(List.of(FilebotExecutionStatus.PROCESSED, FilebotExecutionStatus.FINISHED))) {
+                if (Boolean.FALSE.equals(FilebotExecutionStatus.TEST.equals(filebotExecution.getStatus()))) {
+                    filebotExecution.setStatus(FilebotExecutionStatus.UNPROCESSED);
+                }
                 filebotExecution.setOnCallback(false);
                 filebotExecutionService.save(filebotExecution);
             }
@@ -247,7 +247,6 @@ public class FilebotService {
                     filebotConversation.getChatId(), filebotConversation.getId());
             processNotProcessing();
         }
-
     }
 
     public void recieveTMDBData(TelegramFilebotExecutionODTO telegramFilebotExecutionODTO) {
@@ -297,9 +296,10 @@ public class FilebotService {
         SendPhoto toSend = modelMapper.map(message, SendPhoto.class);
         InputFile inputFile = new InputFile();
         inputFile.setMedia(message.getPhotoUrl());
-        toSend.setPhoto(null);
+        toSend.setPhoto(inputFile);
+        toSend.setCaption(message.getText());
         FilebotConversation filebotConversation = filebotConversationService
-                .findByChatId(message.getIdFilebotConversation())
+                .findByChatId(message.getChatId())
                 .get();
         if (Objects.nonNull(filebotConversation)) {
             String messageId = filebotHandler.sendPhoto(toSend);
