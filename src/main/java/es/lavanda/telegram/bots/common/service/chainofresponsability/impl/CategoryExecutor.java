@@ -127,12 +127,13 @@ public class CategoryExecutor implements Handler {
                             .setSelectedPossibilities(elected.getFilebotExecutionODTO().getSelectedPossibilities());
                     filebotExecution.setOnCallback(false);
                     filebotExecution.setStatus(FilebotExecutionStatus.PROCESSED);
-                } else {
-                    elected.setTimes(elected.getTimes() - 1);
-                    if (elected.getTimes() == 0) {
-                        iterator.remove();
-                    }
-                }
+                } 
+                // else {
+                //     elected.setTimes(elected.getTimes() - 1);
+                //     if (elected.getTimes() == 0) {
+                //         iterator.remove();
+                //     }
+                // }
             }
             electedService.save(electeds);
             return filebotExecutionService.save(filebotExecution);
