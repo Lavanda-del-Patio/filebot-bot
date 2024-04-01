@@ -99,6 +99,8 @@ public class FilebotHandler extends TelegramLongPollingBot {
             if (e.getMessage()
                     .contains("Error deleting message: [400] Bad Request: message can't be deleted for everyone")) {
                 log.info("Message already deleted");
+            } else if (e.getMessage().contains("[400] Bad Request: message to delete not found")) {
+                log.info("Message to delete not found deleted");
             } else {
                 throw new FilebotException("Telegram exception deleting message", e);
             }
